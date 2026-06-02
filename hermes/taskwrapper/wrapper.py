@@ -118,21 +118,34 @@ t
         :return:
             a list with tokens and a flag that indicates if its a path or not.
         """
-        retList = []
-        if ('{' in parameter) and ('}' in parameter):
-            for pot_token in parameter.split("{"):
-                if "}" not in pot_token:
-                    if pot_token != '':
-                        retList.append((pot_token,False))
+        tokens = []
+        buf = []
+        in_brace = False
+        i = 0
+        while i < len(parameter):
+            ch = parameter[i]
+            if ch == '\\':
+                i += 1
+                if i < len(parameter):
+                    buf.append(parameter[i])
                 else:
-                    rest = pot_token.split("}")
-                    retList.append((rest[0],True))
-                    if rest[1] != '':
-                        retList.append((rest[1], False))
-        else:
-            retList.append((parameter,False))
-
-        return retList
+                    buf.append('\\')
+            elif ch == '{' and not in_brace:
+                if buf:
+                    tokens.append((''.join(buf), False))
+                    buf = []
+                in_brace = True
+            elif ch == '}' and in_brace:
+                if buf:
+                    tokens.append((''.join(buf), True))
+                    buf = []
+                in_brace = False
+            else:
+                buf.append(ch)
+            i += 1
+        if buf:
+            tokens.append((''.join(buf), in_brace))
+        return tokens
 
     ## ====================================================================
     ## ====================================================================
