@@ -14,6 +14,7 @@ FoamFile
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+{% import "openFOAM/utils.jinja"  as utils %}
 
 application     {{values.application}};
 
@@ -59,12 +60,22 @@ libs
 functions
 {
     {%- for functionName,functionData in values.functions.items() %}
-       {{functionName}}
-       {
-           {%- for attrName,attrData in functionData.items() -%}
-           {{attrName}} {{attrData}};
-           {%- endfor -%}
-       }
+        {{functionName}}
+        {
+            {% for attrName,attrData in functionData.items() %}
+            {% if attrName == "libs" and attrData is iterable and (attrData is not string and attrData is not mapping) %}
+            {{attrName}} (
+                {%- for lib in attrData %} "{{ lib }}" {%- endfor -%}
+            );
+            {%else%}
+            {% if attrData is boolean %}
+            {{attrName}} {{utils.toBool(attrData)}};
+            {% else %}
+            {{attrName}} {{attrData}};
+            {% endif %}
+            {% endif %}
+            {% endfor %}
+        }
     {% endfor %}
 }
 
