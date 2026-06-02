@@ -126,33 +126,59 @@ class utils:
     def _handle_value(self,parameterPath, params):
         return params.get(".".join(parameterPath[1:]),{})
 
-    def _handle_token_moduleName(self):
+    def _handle_token_moduleName(self, **kwargs):
         return sys.argv[2]
 
-    def _handle_token_calc(self):
+    def _handle_token_calc(self, **kwargs):
         return "#calc "
 
+    def _handle_token_codeStream(self, paramPath,params):
+        return paramPath
+
     def _parseAndEvaluatePath(self, paramPath,params):
-        logger = get_classMethod_logger(self,"_parseAndEvaluatePath")
-        value = []
+        """Parse and evaluate a parameter path.
+
+        Parameters
+        ----------
+        paramPath : str
+            The path string to parse, which may contain tokens prefixed with '#'.
+        params : dict
+            Dictionary of parameters used for token resolution.
+
+        Returns
+        -------
+        str or list
+            The evaluated value. If all tokens resolve to simple types, a concatenated string is returned; otherwise the first resolved value is returned.
+
+        Notes
+        -----
+        The method tokenizes the path, handles special tokens via `_handle_token_*` methods, and resolves path segments against the provided `params` dictionary. It supports nested structures and returns a string or the original value depending on the content.
+        """
+        logger = get_classMethod_logger(self,"_parseAndEvaluatePath")  # Logger for debugging
+        value = []  # Accumulate resolved tokens
         if paramPath.startswith("#{"):
+            # Directly return literal string starting with '#{'
             ret = paramPath
         else:
+            # Tokenize the path into segments and flags indicating if they are paths
             tokenList = hermes.hermesTaskWrapper.parsePath(paramPath)
+            paramPath = paramPath.replace("\\{", "{")
+            paramPath = paramPath.replace("\\}", "}")
             logger.debug(f"Inspecting the token list {tokenList}")
             for token, ispath in tokenList:
                 logger.info(f"The token {token}")
                 testIfTokenIsAHandler = False
                 if token.startswith("#"):
                     if len(token[1:]) > 0:
-                        testIfTokenIsAHandler = True if hasattr(self,f"_handle_token_{token[1:]}".strip()) else False
+                        # Check if a handler method exists for this token
+                        testIfTokenIsAHandler = True if hasattr(self,f"_handle_token_{token[1:].split('{')[0]}".strip()) else False
                     else:
                         testIfTokenIsAHandler = False
                 logger.debug(f"The token {token} is a handler? {testIfTokenIsAHandler}. Is path? {ispath}")
                 if testIfTokenIsAHandler:
                     try:
-                        tknval_func = getattr(self,f"_handle_token_{token[1:]}".strip())
-                        value.append(tknval_func())
+                        tknval_func = getattr(self,f"_handle_token_{token[1:].split('{')[0]}".strip())
+                        value.append(tknval_func(paramPath=paramPath, params=params))
                     except AttributeError:
                         existingTokens = ",".join([x for x in dir(self) if x.startswith("_handle_token_")])
                         raise ValueError(f"token: {token[1:]} does not exist. Available Tokens are: {existingTokens}")
@@ -171,9 +197,11 @@ class utils:
                         print(errMsg)
                         raise KeyError(errMsg)
                 else:
+                    # Plain string token, add as-is
                     logger.debug(token)
                     value.append(token)
 
+            # Combine resolved tokens into final return value
             if (all([isinstance(x, str) or isinstance(x, float) or isinstance(x, int)  for x in value])):
                 ret = "".join([str(x) for x in value])
             else:
