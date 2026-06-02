@@ -14,66 +14,85 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-{%- import "openFOAM/system/FvSolution/solvers.jinja" as solvers %}
+{% import "openFOAM/system/FvSolution/solvers.jinja" as solvers %}
 
 solvers
 {
-    {% for fieldName, solverData in fields.items() %}
-        {{ solvers.solver(fieldName, solverData, False) }}
-        {% if solverData.final is defined %}
-            {{ solvers.solver(fieldName + "Final", solverData.final, False) }}
-        {% endif %}
-    {% endfor %}
+{% for fieldName, solverData in fields.items() %}
+    {{ solvers.solver(fieldName, solverData, False) }}
+    {% if solverData.final is defined %}
+    {{ solvers.solver(fieldName + "Final", solverData.final, False) }}
+    {% endif %}
+{% endfor %}
 }
 
-{{solverProperties.algorithm}}
+{% if solverProperties is iterable and (solverProperties is not string and solverProperties is not mapping) %}
+{% for solverProperty in solverProperties%}
+{{solverProperty.algorithm}}
 {
-    {% if 'residualControl' in solverProperties %}
+    {% if 'residualControl' in solverProperty %}
     residualControl
     {
-        {% for fieldName, factor in solverProperties.residualControl.items() -%}
+        {% for fieldName, factor in solverProperty.residualControl.items() %}
         {{fieldName}}    {{factor}};
         {% endfor %}
     }
     {% endif %}
 
-    {% if 'solverFields' in solverProperties %}
-        {% for field,fieldValue in solverProperties.solverFields.items() -%}
-            {{field}} {{fieldValue}};
-        {% endfor %}
+    {% if 'solverFields' in solverProperty %}
+    {% for field,fieldValue in solverProperty.solverFields.items() %}
+    {{field}} {{fieldValue}};
+    {% endfor %}
     {% endif %}
 }
+{% endfor %}
+{% else %}
+{{solverProperties.algorithm}}
+{
+    {% if 'residualControl' in solverProperties %}
+    residualControl
+    {
+    {% for fieldName, factor in solverProperties.residualControl.items() %}
+        {{fieldName}}    {{factor}};
+    {% endfor %}
+    }
+    {% endif %}
+
+    {% if 'solverFields' in solverProperties %}
+    {% for field,fieldValue in solverProperties.solverFields.items() %}
+    {{field}} {{fieldValue}};
+    {% endfor %}
+    {% endif %}
+}
+
+{% endif %}
 
 relaxationFactors
 {
     {% if 'fields' in relaxationFactors %}
     fields
     {
-        {% for fieldName, factor in relaxationFactors.fields.items() -%}
+    {% for fieldName, factor in relaxationFactors.fields.items() %}
         {{fieldName}} {{factor}};
-        {% endfor %}
+    {% endfor %}
     }
     {% endif %}
 
     {% if 'equations' in relaxationFactors %}
     equations
     {
-        {% for fieldName, factorData in relaxationFactors.equations.items() %}
-            {% if factorData is mapping %}
-                {% if factorData.factor is defined %}
-                {{ fieldName }}    {{ factorData.factor }};
-                {% endif %}
-                {% if factorData.final is defined %}
-                {{ fieldName }}Final    {{ factorData.final }};
-                {% endif %}
-
-                }
-            {% else %}
-                {{ fieldName }}    {{ factorData }};
-            {% endif %}
-        {% endfor %}
-
-
+    {% for fieldName, factorData in relaxationFactors.equations.items() %}
+        {% if factorData is mapping %}
+        {% if factorData.factor is defined %}
+        {{ fieldName }}    {{ factorData.factor }};
+        {% endif %}
+        {% if factorData.final is defined %}
+        {{ fieldName }}Final    {{ factorData.final }};
+        {% endif %}
+        {% else %}
+        {{ fieldName }}    {{ factorData }};
+        {% endif %}
+    {% endfor %}
     }
     {% endif %}
 }
