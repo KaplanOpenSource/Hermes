@@ -88,7 +88,7 @@ class workflow:
     def taskRepresentations(self):
         return self._taskRepresentations
 
-    def __init__(self, workflowJSON,WD_path=None,Resources_path="",name=None):
+    def __init__(self, workflowJSON,WD_path=None,name=None,Resource_path=""):
         """
                 Initiates the hermes workflow.
 
@@ -96,7 +96,7 @@ class workflow:
         ----------
         workflowJSON
         WD_path
-        Resources_path
+        Resource_path
         name : str,Optional
             The name of the workflow
 
@@ -113,7 +113,7 @@ class workflow:
 
         self.name = name
         self.WD_path=WD_path if WD_path is not None else os.getcwd()
-        self.Resources_path=Resources_path
+        self.Resource_path = os.path.join(self.WD_path, f"{self.name}.json") if Resource_path is None or Resource_path=="" else Resource_path
         self.logger = hermes_logging.get_logger(self)
         ## This expand add the default values from the template and the GUI.
         ## We find it adding bugs (because the defaults are specifc for a case, and the gui is not useful).
@@ -123,6 +123,10 @@ class workflow:
         self._hermes_task_wrapper_home = hermes_task_wrapper_home
 
         self._buildNetwork()
+
+    @property
+    def resource(self):
+        self.Resource_path
 
     def _buildNetworkRepresentations(self, taskname, taskJSON):
         """
@@ -532,27 +536,26 @@ class workflow:
 
         """
 
-
         if workflowName is None and self.name is None:
             raise ValueError("Must supply file name")
 
-        if workflowName is not None:
-            if 'json' in workflowName:
-                outFileName = workflowName
-            else:
-                outFileName = f"{workflowName}.json"
+        if self.Resource_path is None or len(self.Resource_path) == 0:
+            resource = workflowName if self.name is None else self.name
         else:
-            outFileName = f"{self.name}.json"
-
+            resource = self.Resource_path
+        
+        if not resource.endswith('.json'):
+            resource = f"{resource}.json"
+ 
         if directory is not None:
-            outFileName = os.path.join(directory,outFileName)
+            resource = os.path.join(directory,resource)
 
         if fullJSON:
             output = self._workflowJSON
         else:
             output = self._stripGUIandFinalNode()
 
-        with open(outFileName,'w') as writeFile:
+        with open(resource,'w') as writeFile:
             json.dump(output,writeFile,indent=4)
 
 

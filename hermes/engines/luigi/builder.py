@@ -81,15 +81,14 @@ import luigi
 import json 
 import sys
 
-sys.path.insert(1, "{{Resources_path}}")
+sys.path.insert(1, "{{Resource_path}}")
 from hermes.engines.luigi.taskUtils import utils as hermesutils
 
 """
         import jinja2
 
         rtemplate = jinja2.Environment(loader=jinja2.BaseLoader()).from_string(ret)
-        ret=rtemplate.render(Resources_path=workflow.Resources_path)
-
+        ret=rtemplate.render(Resource_path=workflow.Resource_path)
         # print("LuigiBuilder-workflow.WD_path="+workflow.WD_path+"\n")
 
         for taskname,taskWrapperList in workflow.taskRepresentations.items():
