@@ -4,7 +4,35 @@ import os
 import pathlib
 import shutil
 import logging
+import uuid
 from ..utils.jsonutils import loadJSON
+
+
+# Luigi scheduler selection used by buildLuigiExecutionCommand below.
+SCHEDULER_LOCAL = "local"
+SCHEDULER_CENTRAL = "central"
+
+
+def buildLuigiExecutionCommand(moduleName, dispatch_id, scheduler=SCHEDULER_LOCAL,
+                               schedulerHost=None, schedulerPort=None,
+                               targetTask="finalnode_xx_0"):
+    """Build the ``python3 -m luigi`` command line used to execute a workflow.
+
+    ``scheduler="local"`` (default) adds ``--local-scheduler``; ``"central"`` connects
+    to a running ``luigid`` (optionally at ``schedulerHost``/``schedulerPort``, otherwise
+    Luigi's defaults). ``dispatch_id`` is passed as ``--dispatch-id`` and uniquely
+    identifies the run so the central scheduler does not deduplicate distinct executions.
+    """
+    cmd = f"python3 -m luigi --module {moduleName} {targetTask}"
+    if scheduler == SCHEDULER_CENTRAL:
+        if schedulerHost is not None:
+            cmd += f" --scheduler-host {schedulerHost}"
+        if schedulerPort is not None:
+            cmd += f" --scheduler-port {schedulerPort}"
+    else:
+        cmd += " --local-scheduler"
+    cmd += f" --dispatch-id {dispatch_id}"
+    return cmd
 
 def handler_expand(arguments):
     logger = logging.getLogger("hermes.bin.expand")
@@ -42,18 +70,28 @@ def handler_build(arguments):
 
 def handler_execute(arguments):
     """
-        Should be updated to select execution engine.
+        Executes the built workflow with the selected Luigi scheduler.
+
+        The scheduler (local/central), its optional host/port and the dispatch_id are
+        read from ``arguments`` (falling back to the local scheduler and a fresh uuid4
+        when not provided), so the centralized scheduler can tell distinct runs apart.
     :param arguments:
     :return:
     """
 
     pythonPath = arguments.caseName.split(".")[0]
 
+    scheduler = getattr(arguments, "scheduler", SCHEDULER_LOCAL) or SCHEDULER_LOCAL
+    schedulerHost = getattr(arguments, "scheduler_host", None)
+    schedulerPort = getattr(arguments, "scheduler_port", None)
+    dispatch_id = getattr(arguments, "dispatch_id", None) or uuid.uuid4().hex
 
     #cwd = pathlib.Path().absolute()
     #moduleParent = pathlib.Path(pythonPath).parent.absolute()
     #os.chdir(moduleParent)
-    executionStr = f"python3 -m luigi --module {os.path.basename(pythonPath)} finalnode_xx_0 --local-scheduler"
+    executionStr = buildLuigiExecutionCommand(os.path.basename(pythonPath), dispatch_id,
+                                              scheduler=scheduler, schedulerHost=schedulerHost,
+                                              schedulerPort=schedulerPort)
     print(executionStr)
 
     if arguments.force:
