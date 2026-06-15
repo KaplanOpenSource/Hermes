@@ -20,8 +20,14 @@ class transform:
     _basicLuigiTemplate = """
 class {{taskwrapper.taskfullname}}(luigi.Task,hermesutils):
 
+    # Unique identifier for a single workflow execution (dispatch). Luigi's central
+    # scheduler differentiates tasks by their family name + parameters, so without a
+    # per-run parameter identical workflows from different runs would collide / be
+    # deduplicated. An empty default preserves the legacy --local-scheduler behavior.
+    dispatch_id = luigi.Parameter(default="")
+
     _taskJSON = None
-    _workflowJSON = None 
+    _workflowJSON = None
     
     @property 
     def workflowJSON(self):
@@ -39,11 +45,18 @@ class {{taskwrapper.taskfullname}}(luigi.Task,hermesutils):
 
     def output(self):
         targetBaseFile = os.path.abspath(__file__).split(".")[0]
-        return luigi.LocalTarget(os.path.join(f"{targetBaseFile}_targetFiles","{{taskwrapper.taskfullname}}.json"))
+        # Isolate the target files of each dispatch in their own subdirectory so that
+        # concurrent or repeated dispatches do not see each other's completed targets
+        # (Luigi treats an existing target as "task already done"). An empty
+        # dispatch_id collapses to the legacy flat layout.
+        dispatchSubdir = self.dispatch_id or ""
+        return luigi.LocalTarget(os.path.join(f"{targetBaseFile}_targetFiles",dispatchSubdir,"{{taskwrapper.taskfullname}}.json"))
 
     def requires(self):
+        # Propagate dispatch_id to the required tasks; Luigi does not thread parameters
+        # to dependencies automatically, so the whole DAG must share the same id.
         return dict({% for (i,(rtaskname,rtask)) in enumerate(taskwrapper.requiredTasks.items()): %}
-                       {{rtaskname}}={{rtask.taskfullname}}(){% if i+1<len(taskwrapper.requiredTasks) %},{% else %}{% endif %}{% endfor %}
+                       {{rtaskname}}={{rtask.taskfullname}}(dispatch_id=self.dispatch_id){% if i+1<len(taskwrapper.requiredTasks) %},{% else %}{% endif %}{% endfor %}
                    )
 
     def run(self):
