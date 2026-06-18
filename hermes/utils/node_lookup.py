@@ -1,6 +1,6 @@
 import os
+from pathlib import Path
 import json
-import re
 import ast
 from typing import List, Dict, Any, Optional, Set
 
@@ -231,7 +231,16 @@ def extract_params_from_jinja(file_path: str) -> List[NodeParameter]:
 
     return params
 
-def get_all_node_types(resources_root: str) -> Dict[str, NodeInfo]:
+def _resources_root() -> str:
+    """Return the absolute path to the hermes Resources directory.
+    Mirrors the logic in JinjaTransform._resources_root().
+    """
+    here = Path(__file__).resolve()
+    
+    candidate = here.parent / "Resources"
+    return str(candidate)
+
+def get_all_node_types(resources_root: str=_resources_root()) -> Dict[str, NodeInfo]:
     """Scans resources root for node types and their parameters."""
     nodes_info = {}
 
@@ -278,17 +287,10 @@ def get_all_node_types(resources_root: str) -> Dict[str, NodeInfo]:
 
     return nodes_info
 
+
 # Example usage:
 if __name__ == "__main__":
-    import sys
-    from pathlib import Path
-
-    current_dir = Path(__file__).resolve().parent
-    resources_path = current_dir.parent / "Resources"
-    if not resources_path.exists():
-        resources_path = Path("/raid/users/liora/Development/Hermes/hermes/Resources")
-
-    results = get_all_node_types(str(resources_path))
+    results = get_all_node_types()
     for node_type, info in results.items():
         print(f"Node: {node_type}")
         for p in info.parameters:
