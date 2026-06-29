@@ -1,3 +1,0 @@
-hermes-Workflow expand simpleFOAMTemplate.json simpleFOAMWorkflow.json
-hermes-Workflow buildPython simpleFOAMWorkflow.json simpleFOAMWorkFlow
-hermes-Workflow executeLuigi simpleFOAMWorkFlow
