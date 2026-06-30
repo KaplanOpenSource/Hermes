@@ -1,8 +1,12 @@
+import ast
+import json
 import os
 from pathlib import Path
-import json
-import ast
-from typing import List, Dict, Any, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Tuple
+
+from jinja2 import Environment, meta, nodes
+from param import output
+
 
 class NodeParameter:
     def __init__(self, name: str, is_required: bool, source: str):
@@ -17,15 +21,28 @@ class NodeParameter:
             "source": self.source
         }
 
+class NodeOutput:
+    def __init__(self, name: str, source: str):
+        self.name = name
+        self.source = source
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "name": self.name,
+            "source": self.source
+        }
+
 class NodeInfo:
-    def __init__(self, node_type: str, parameters: List[NodeParameter]):
+    def __init__(self, node_type: str, parameters: List[NodeParameter], outputs: List[NodeOutput]):
         self.node_type = node_type
         self.parameters = parameters
+        self.outputs = outputs
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             "type": self.node_type,
-            "parameters": [p.to_dict() for p in self.parameters]
+            "parameters": [p.to_dict() for p in self.parameters],
+            "outputs": [p.to_dict() for p in self.outputs],
         }
 
 def extract_params_from_json(file_path: str) -> List[NodeParameter]:
@@ -41,9 +58,10 @@ def extract_params_from_json(file_path: str) -> List[NodeParameter]:
         pass
     return params
 
-def extract_params_from_python(file_path: str) -> List[NodeParameter]:
+def extract_params_from_python(file_path: str) -> Tuple[List[NodeParameter], List[NodeOutput]]:
     """Extracts parameters from _defaultParameters method in executer.py."""
     params = []
+    outputs = []
     try:
         with open(file_path, 'r') as f:
             tree = ast.parse(f.read())
@@ -72,11 +90,25 @@ def extract_params_from_python(file_path: str) -> List[NodeParameter]:
                                         for elt in input_val.elts:
                                             if isinstance(elt, ast.Constant):
                                                 params.append(NodeParameter(elt.value, True, "python"))
+                if isinstance(node, ast.FunctionDef) and node.name == "run":
+                    # Look for return statement
+                    for stmt in node.body:
+                        if isinstance(stmt, ast.Return):
+                            # We expect a dict call(`dict(...)`) or constant dict(`[...]`)
+                            val = stmt.value
+                            if isinstance(val, ast.Dict):
+                                for i, key in enumerate(val.keys):
+                                    if isinstance(key, ast.Constant) and isinstance(key.value, str):
+                                        outputs.append(NodeOutput(key.value, "python"))
+                            elif isinstance(val, ast.Call) and getattr(val.func, 'id', '') == 'dict':
+                                # Handle dict(...) call
+                                for kw in val.keywords:
+                                    outputs.append(NodeOutput(kw.arg, "python"))
+                    pass
     except Exception:
         pass
-    return params
+    return (params, outputs)
 
-from jinja2 import Environment, meta, nodes
 
 def extract_params_from_jinja(file_path: str) -> List[NodeParameter]:
     """Extracts parameters from Jinja template files using AST analysis.
@@ -148,13 +180,15 @@ def extract_params_from_jinja(file_path: str) -> List[NodeParameter]:
 
                 # Body is guarded by these variables
                 if isinstance(node.body, list):
-                    for child in node.body: walk(child, new_guards, current_usage_guard, False)
+                    for child in node.body:
+                        walk(child, new_guards, current_usage_guard, False)
                 elif node.body is not None:
                     walk(node.body, new_guards, current_usage_guard, False)
 
                 if node.else_:
                     if isinstance(node.else_, list):
-                        for child in node.else_: walk(child, active_guards, current_usage_guard, False)
+                        for child in node.else_:
+                            walk(child, active_guards, current_usage_guard, False)
                     elif node.else_ is not None:
                         walk(node.else_, active_guards, current_usage_guard, False)
                 return
@@ -168,7 +202,8 @@ def extract_params_from_jinja(file_path: str) -> List[NodeParameter]:
                         usage_guards.setdefault(path, set()).add(is_guarded)
 
                 if isinstance(node.body, list):
-                    for child in node.body: walk(child, active_guards, current_usage_guard, False)
+                    for child in node.body:
+                        walk(child, active_guards, current_usage_guard, False)
                 elif node.body is not None:
                     walk(node.body, active_guards, current_usage_guard, False)
                 return
@@ -212,12 +247,14 @@ def extract_params_from_jinja(file_path: str) -> List[NodeParameter]:
             # Recursive walk for other container nodes
             if hasattr(node, 'body'):
                 if isinstance(node.body, list):
-                    for child in node.body: walk(child, active_guards, current_usage_guard, False)
+                    for child in node.body:
+                        walk(child, active_guards, current_usage_guard, False)
                 elif node.body is not None:
                     walk(node.body, active_guards, current_usage_guard, False)
 
             if isinstance(node, nodes.Output):
-                for child in node.nodes: walk(child, active_guards, current_usage_guard, False)
+                for child in node.nodes:
+                    walk(child, active_guards, current_usage_guard, False)
 
         walk(ast, set())
 
@@ -237,7 +274,7 @@ def _resources_root() -> str:
     """
     here = Path(__file__).resolve()
     
-    candidate = here.parent / "Resources"
+    candidate = here.parent.parent / "Resources"
     return str(candidate)
 
 def get_all_node_types(resources_root: str=_resources_root()) -> Dict[str, NodeInfo]:
@@ -259,6 +296,7 @@ def get_all_node_types(resources_root: str=_resources_root()) -> Dict[str, NodeI
         # A directory is a node if it contains any of the signature files
         is_node = False
         found_params: Dict[str, NodeParameter] = {}
+        found_outputs: Dict[str, NodeOutput] = {}
 
         if "jsonForm.json" in files:
             is_node = True
@@ -267,9 +305,13 @@ def get_all_node_types(resources_root: str=_resources_root()) -> Dict[str, NodeI
 
         if "executer.py" in files:
             is_node = True
-            for p in extract_params_from_python(os.path.join(root, "executer.py")):
+            params, outputs = extract_params_from_python(os.path.join(root, "executer.py"))
+            for p in params:
                 if p.name not in found_params:
                     found_params[p.name] = p
+            for o in outputs:
+                if o.name not in found_outputs:
+                    found_outputs[o.name] = o
 
         # Check for Jinja templates (only legacy jinjaTemplate)
         template_file = None
@@ -283,15 +325,17 @@ def get_all_node_types(resources_root: str=_resources_root()) -> Dict[str, NodeI
                     found_params[p.name] = p
 
         if is_node:
-            nodes_info[node_type] = NodeInfo(node_type, list(found_params.values()))
+            nodes_info[node_type] = NodeInfo(node_type, list(found_params.values()), list(found_outputs.values()))
 
     return nodes_info
 
 
-# Example usage:
+
 if __name__ == "__main__":
     results = get_all_node_types()
     for node_type, info in results.items():
         print(f"Node: {node_type}")
         for p in info.parameters:
-            print(f"  - {p.name} (req={p.is_required}, src={p.source})")
+            print(f"  - (p) {p.name} (req={p.is_required}, src={p.source})")
+        for o in info.outputs:
+            print(f"  - (o) {o.name} (src={p.source})")
