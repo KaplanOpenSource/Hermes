@@ -78,7 +78,7 @@ def _build_and_run(workdir, dispatch_id):
     env["PYTHONPATH"] = os.pathsep.join([HERMES_ROOT, workdir, env.get("PYTHONPATH", "")])
     result = subprocess.run(
         [sys.executable, "-m", "luigi", "--module", "Workflow1",
-         "finalnode_xx_0", "--local-scheduler", "--dispatch-id", dispatch_id],
+         "finalnode_xx_0", "--local-scheduler"],
         cwd=workdir, env=env, capture_output=True, text=True,
     )
     return result
