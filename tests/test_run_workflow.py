@@ -10,7 +10,6 @@ runs it with Luigi's local scheduler and a dispatch_id, and verifies that:
   - a different dispatch_id produces an independent run (no collision).
 """
 
-import json
 import os
 import subprocess
 import sys
@@ -62,7 +61,7 @@ def _build_and_run(workdir, dispatch_id):
     """Build the workflow into a Luigi module and execute it for the given dispatch_id."""
     # hermes is imported lazily so a missing optional dependency skips, not errors.
     hermes = pytest.importorskip("hermes")
-    from hermes import workflow
+    workflow = hermes.workflow
 
     # Lay down the workflow inputs in the working directory.
     os.makedirs(os.path.join(workdir, "source"), exist_ok=True)

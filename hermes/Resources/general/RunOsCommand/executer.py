@@ -1,7 +1,6 @@
 from ...executers.abstractExecuter import abstractExecuter
-import shutil
-import os, sys, stat
-import subprocess
+import os
+import stat
 
 class RunOsCommand(abstractExecuter):
 
@@ -15,7 +14,6 @@ class RunOsCommand(abstractExecuter):
         )
 
     def run(self, **inputs):
-        import stat,os
         cwd = os.getcwd()
         if "changeDirTo" in inputs:
             os.chdir(os.path.abspath(inputs["changeDirTo"]))
@@ -34,7 +32,7 @@ class RunOsCommand(abstractExecuter):
                 ErrorMsg = f"{fullPath} failed"
 
         elif inputs["Method"]=="Command list":
-            import subprocess, stat, numpy
+            import numpy
             ret = []
             for cmd in numpy.atleast_1d(inputs["Command"]):
                 ret_val = os.system(cmd)

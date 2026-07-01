@@ -1,17 +1,16 @@
-import pytest
+# import pytest - will still discpver tes_t... 
+
 from hermes.utils.node_lookup import get_all_node_types
+
 
 def test_get_all_node_types():
     # This depends on the environment, but we know where Resources is in this repo
-    resources_path = "/raid/users/liora/Development/Hermes/hermes/Resources"
-    nodes = get_all_node_types(resources_path)
-
+    nodes = get_all_node_types()
     assert isinstance(nodes, dict)
     assert len(nodes) > 0
 
 def test_copy_directory_parameters():
-    resources_path = "/raid/users/liora/Development/Hermes/hermes/Resources"
-    nodes = get_all_node_types(resources_path)
+    nodes = get_all_node_types()
 
     assert "general.CopyDirectory" in nodes
     params = [p.name for p in nodes["general.CopyDirectory"].parameters]
@@ -20,8 +19,7 @@ def test_copy_directory_parameters():
     assert "Target" in params or "target" in params
 
 def test_fvschemes_optionality():
-    resources_path = "/raid/users/liora/Development/Hermes/hermes/Resources"
-    nodes = get_all_node_types(resources_path)
+    nodes = get_all_node_types()
 
     assert "openFOAM.system.FvSchemes" in nodes
     params = {p.name: p for p in nodes["openFOAM.system.FvSchemes"].parameters}

@@ -3,8 +3,6 @@ import logging
 import logging.config
 import os.path
 import pathlib
-from importlib import resources
-from typing import List
 from importlib.resources import read_text
 
 HERMES_DEFAULT_LOG_DIR = pathlib.Path.home() / ".pyhermes" / "log"
@@ -43,7 +41,7 @@ def get_default_logging_config(*, disable_existing_loggers: bool = False) -> dic
     return config
 
 
-def initialize_logging(*logger_overrides: (str, dict), disable_existing_loggers: bool = True) -> None:
+def initialize_logging(*logger_overrides: dict[str, dict], disable_existing_loggers: bool = True) -> None:
     """
     Initialize logging for the Hera library
 
@@ -76,7 +74,7 @@ def initialize_logging(*logger_overrides: (str, dict), disable_existing_loggers:
     logging.config.dictConfig(config)
 
 
-def with_logger(logger_name, level=None, handlers=None, propagate=None) -> (str, dict):
+def with_logger(logger_name, level=None, handlers=None, propagate=None) -> dict[str, dict]:
     """Build a dictionary describing a logger, for use with initialize_logging()"""
     logger_dict = dict(level=level, handlers=handlers, propagate=propagate)
     # Remove from dict parameters not supplied; this allows the use here
