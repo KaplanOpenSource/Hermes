@@ -1,15 +1,14 @@
-import copy
-from _io import TextIOWrapper
-import os
 import json
+import os
 from itertools import product
-import pandas.io.json
 
-from ..taskwrapper import hermes_task_wrapper_home,hermesTaskWrapper
+import pandas
+
 from ..engines import builders
-from .expandWorkflow import expandWorkflow
+from ..taskwrapper import hermes_task_wrapper_home, hermesTaskWrapper
 from ..utils.jsonutils import loadJSON
-from ..utils.logging import helpers as hermes_logging, get_classMethod_logger
+from ..utils.logging import get_classMethod_logger
+from ..utils.logging import helpers as hermes_logging
 
 try:
     import mongoengine.base.datastructures as mongoDataStructures
@@ -299,7 +298,7 @@ class workflow:
         logger = get_classMethod_logger(self,"setitem")
 
         if not isinstance(value,dict):
-            err = f"The value must be dict."
+            err = "The value must be dict."
             logger.error(err)
             raise ValueError(err)
 
@@ -321,7 +320,7 @@ class workflow:
             raise ValueError(err)
 
         if 'node' not in value:
-            err = f"The node data must be in specified in value['node']. Key not found"
+            err = "The node data must be in specified in value['node']. Key not found"
             logger.error(err)
             raise ValueError(err)
 
