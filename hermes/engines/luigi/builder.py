@@ -1,5 +1,7 @@
 import pydoc
 
+from hermes.workflow import workflow
+
 
 class LuigiBuilder(object):
     """
@@ -53,7 +55,7 @@ class LuigiBuilder(object):
         taskName = tasktype.split('.')[-1]
         try:
             defaultClass = pydoc.locate(f"hermes.engines.luigi.pythonClass{taskName}.transform")()
-        except:
+        except Exception:
             defaultClass = pydoc.locate("hermes.engines.luigi.pythonClassBase.transform")()
 
         return defaultClass
@@ -61,7 +63,7 @@ class LuigiBuilder(object):
         # return self._mapping.get(tasktype, pydoc.locate("hermes.engines.luigi.default.transform")())
 
 
-    def buildWorkflow(self, workflow):
+    def buildWorkflow(self, workflow:workflow):
 
         """
             Converts the workflow to a Luigi python program.
@@ -89,9 +91,8 @@ from hermes.engines.luigi.taskUtils import utils as hermesutils
 
         rtemplate = jinja2.Environment(loader=jinja2.BaseLoader()).from_string(ret)
         ret=rtemplate.render(Resource_path=workflow.Resource_path)
-        # print("LuigiBuilder-workflow.WD_path="+workflow.WD_path+"\n")
 
-        for taskname,taskWrapperList in workflow.taskRepresentations.items():
+        for _, taskWrapperList in workflow.taskRepresentations.items():
             for taskwrapper in taskWrapperList:
                 transformer = self._getTransformaer(taskwrapper.taskType)
                 ret += transformer.transform(taskwrapper, workflow.WD_path) + "\n"
