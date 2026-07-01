@@ -1,0 +1,34 @@
+{
+    "Execution": {
+        "input_parameters": {
+            "ModulePath": "",
+            "ClassName": "",
+            "MethodName": "",
+            "Parameters": {}
+        }
+    },
+    "GUI": {
+        "Type": "general.RunPythonCode.workbench.RunPythonCode",
+        "Properties": {
+            "ModulePath": {
+                "prop": "ModulePath",
+                "init_val": "",
+                "type": "App::PropertyPath",
+                "Heading": "PythonNodule",
+                "tooltip": "The path to the python module directory",
+                "current_val": ""
+            },
+            "ClassName": {
+                "prop": "ClassName",
+                "init_val": "",
+                "type": "App::PropertyPath",
+                "Heading": "PythonNodule",
+                "tooltip": "The name of the class to load",
+                "current_val": ""
+            }
+        },
+        "WebGui": {
+            "formData" : {}
+        }
+    }
+}
