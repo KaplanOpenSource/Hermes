@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from jinja2 import Environment, meta, nodes
-from param import output
 
 
 class NodeParameter:
