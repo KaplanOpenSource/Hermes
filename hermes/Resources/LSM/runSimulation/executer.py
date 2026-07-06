@@ -41,7 +41,7 @@ class runSimulation(abstractExecuter):
 
         if 'SimulationName' not in inputs:
             raise Exception("Node wasn't given simulation name through `SimulationName` parameter")
-        simulation_name = hera.datalayer.Project(projectName=inputs['SimulationName'])
+        simulation_name = inputs['SimulationName']
         
         template = inputs.get("Template", "v4-general")
 
@@ -52,8 +52,7 @@ class runSimulation(abstractExecuter):
             raise Exception("Template v4-general isn't loaded to the project. Please load the relevant repository for v4-general into the project.")
         lsm_template = lsm_template[0]
 
-        sim_params = {}
-        sim_params.update(inputs.get("SimulationParameters", {}))
+        sim_params = inputs.get('SimulationParameters', {})
         sim_params = JSONToConfiguration(sim_params)
         if sim_params == {}:
             self.logger.info("Simulation parameters were not specified, running default template parameters")

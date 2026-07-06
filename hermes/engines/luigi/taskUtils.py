@@ -1,10 +1,14 @@
-import os.path
-from collections.abc import Iterable
 import json
-import jsonpath_rw_ext as jp
 import sys
+from collections.abc import Iterable
+
+import jsonpath_rw_ext as jp
+
 import hermes
-from ...utils.logging import get_classMethod_logger,get_logger
+
+from ...utils.logging import get_classMethod_logger
+
+
 class utils:
 
     def get_all_required_outputs(self):
@@ -185,6 +189,9 @@ class utils:
                 elif ispath:
                     try:
                         ret = self._evaluate_path(token, params)
+                        if len(tokenList) == 1:
+                            # this is the case where a user passes the parameter as i "{node.foo.bar}"
+                            return ret
                         ret = f'"{str(ret)}"' if isinstance(ret,dict) else ret
                         value.append(ret)
                     except IndexError:
