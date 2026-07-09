@@ -1,12 +1,12 @@
-from hermes import expandWorkflow,workflow
 import json
-import os
-import pathlib
-import shutil
 import logging
+import os
+import shutil
 import uuid
-from ..utils.jsonutils import loadJSON
 
+from hermes import expandWorkflow, workflow
+
+from ..utils.jsonutils import loadJSON
 
 # Luigi scheduler selection used by buildLuigiExecutionCommand below.
 SCHEDULER_LOCAL = "local"
@@ -31,7 +31,7 @@ def buildLuigiExecutionCommand(moduleName, dispatch_id, scheduler=SCHEDULER_LOCA
             cmd += f" --scheduler-port {schedulerPort}"
     else:
         cmd += " --local-scheduler"
-    cmd += f" --dispatch-id {dispatch_id}"
+    cmd += f" --dispatch-id {dispatch_id}" if scheduler == SCHEDULER_LOCAL else ""
     return cmd
 
 def handler_expand(arguments):
