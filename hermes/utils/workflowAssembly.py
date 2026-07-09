@@ -13,15 +13,14 @@ SCHEDULER_LOCAL = "local"
 SCHEDULER_CENTRAL = "central"
 
 
-def buildLuigiExecutionCommand(moduleName, dispatch_id, scheduler=SCHEDULER_LOCAL,
+def buildLuigiExecutionCommand(moduleName, scheduler=SCHEDULER_LOCAL,
                                schedulerHost=None, schedulerPort=None,
                                targetTask="finalnode_xx_0"):
     """Build the ``python3 -m luigi`` command line used to execute a workflow.
 
     ``scheduler="local"`` (default) adds ``--local-scheduler``; ``"central"`` connects
     to a running ``luigid`` (optionally at ``schedulerHost``/``schedulerPort``, otherwise
-    Luigi's defaults). ``dispatch_id`` is passed as ``--dispatch-id`` and uniquely
-    identifies the run so the central scheduler does not deduplicate distinct executions.
+    Luigi's defaults).
     """
     cmd = f"python3 -m luigi --module {moduleName} {targetTask}"
     if scheduler == SCHEDULER_CENTRAL:
