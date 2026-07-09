@@ -13,7 +13,7 @@ SCHEDULER_LOCAL = "local"
 SCHEDULER_CENTRAL = "central"
 
 
-def buildLuigiExecutionCommand(moduleName, scheduler=SCHEDULER_LOCAL,
+def buildLuigiExecutionCommand(moduleName, dispatch_id=None, scheduler=SCHEDULER_LOCAL,
                                schedulerHost=None, schedulerPort=None,
                                targetTask="finalnode_xx_0"):
     """Build the ``python3 -m luigi`` command line used to execute a workflow.
