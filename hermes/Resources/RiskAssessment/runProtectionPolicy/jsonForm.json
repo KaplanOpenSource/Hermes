@@ -1,0 +1,12 @@
+{
+    "Execution": {
+        "input_parameters": {
+            "ProjectName": "",
+            "LSMPath": "",
+            "policy": "",
+            "Parameters": {}
+        }
+    },
+    "GUI": {
+    }
+}
