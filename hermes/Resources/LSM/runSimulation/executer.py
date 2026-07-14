@@ -63,4 +63,4 @@ class runSimulation(abstractExecuter):
         depositionRates = inputs.get("depositionRates", None)
         res = lsm_template.run(topography=topography, stations=stations,canopy=canopy,depositionRates=depositionRates, saveMode="DB",simulationName=simulation_name,**sim_params)
 
-        return dict(createPythonClass="createPythonClass",resultPath=res.xarray_path)
+        return dict(createPythonClass="createPythonClass",dosageXarray=res.xarray_path)
