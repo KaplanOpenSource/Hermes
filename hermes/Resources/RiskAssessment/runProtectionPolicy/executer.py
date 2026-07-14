@@ -21,7 +21,7 @@ class runSimulation(abstractExecuter):
         return dict(
             output=[],
 
-            inputs=["ProjectName","LSMPath", "policy"],
+            inputs=["ProjectName","LSMDosagePath", "policy"],
             webGUI={},
             parameters={}
         )
@@ -31,7 +31,7 @@ class runSimulation(abstractExecuter):
 
         if 'ProjectName' not in inputs:
             raise Exception("Node wasn't given project name through `ProjectName` parameter")
-        if 'LSMPath' not in inputs:
+        if 'LSMDosagePath' not in inputs:
             raise Exception("Node wasn't given LSM simulation results path through `LSMPath` parameter")
         if 'policy' not in inputs:
             raise Exception("Node wasn't given the protection policy through `policy` parameter")
@@ -44,7 +44,7 @@ class runSimulation(abstractExecuter):
         from hera.simulations.LSM.singleSimulation import SingleSimulation
 
         p = hera.datalayer.Project(projectName=inputs['ProjectName'])
-        s = SingleSimulation()
+        s = SingleSimulation(inputs['LSMDosagePath'])
 
         
         policy = ProtectionPolicy()
