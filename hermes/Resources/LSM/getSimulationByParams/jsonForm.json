@@ -1,0 +1,13 @@
+{
+    "Execution": {
+        "input_parameters": {
+            "ProjectName": "",
+            "Template": "",
+            "SimulationParameters": "",
+            "SimulationName": "",
+            "Parameters": {}
+        }
+    },
+    "GUI": {
+    }
+}
