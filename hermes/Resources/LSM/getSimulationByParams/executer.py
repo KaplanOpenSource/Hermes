@@ -1,7 +1,7 @@
 from ...executers.abstractExecuter import abstractExecuter
 
 
-class runSimulation(abstractExecuter):
+class getSimulationByParams(abstractExecuter):
     """
         Runs a Fortran LSM simulation.
 
@@ -10,11 +10,6 @@ class runSimulation(abstractExecuter):
             Template : str, The class path string to the class
             SimulationParameters : str, The class path string to the class
             SimulationName : str, The class path string to the class
-            saveMode : str, The class path string to the class
-            topography : str, The class path string to the class
-            stations : str, The class path string to the class
-            canopy  : str, The name of the function to run .
-            depositionRates : dict, The parameters for the function.
     """
 
     def _defaultParameters(self):
