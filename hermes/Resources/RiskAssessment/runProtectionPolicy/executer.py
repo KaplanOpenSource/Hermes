@@ -68,4 +68,4 @@ class runSimulation(abstractExecuter):
         elif len(docs) > 1:
             raise Exception(f"There is more than one policy saved with the UUID {uuid}, aborting")
         doc = docs[0]
-        return dict(createPythonClass="createPythonClass",resultPath=doc.resource)
+        return dict(createPythonClass="createPythonClass",concentrationXarray=doc.resource)
