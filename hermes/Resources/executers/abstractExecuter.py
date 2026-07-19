@@ -42,7 +42,11 @@ Example executers:
 
 """
 import abc
+import os
+import pickletools
+
 from hermes.hermesLogging.loggingObject import loggedObject
+
 
 class abstractExecuter(loggedObject):
     """
@@ -53,6 +57,8 @@ class abstractExecuter(loggedObject):
         - List all outputsOriginal.
 
     """
+
+    DASK_TREES_FOLDER = ".dask_trees"
 
     parameters = None
 
@@ -154,3 +160,37 @@ class abstractExecuter(loggedObject):
             A webGUI JSON.
         """
         pass
+
+
+    def save_dask_tree(self, p, dask_tree):
+        """Serializes the dask-task-tree with cloudpickle"""
+        import pathlib
+        from hashlib import sha256
+
+        import cloudpickle
+        dask_tree_serialized = cloudpickle.dumps(dask_tree)
+
+        # to avoid duplicate pickles we compute the hash and name the files based on the first chars of the hash
+        serialization_hash = sha256(dask_tree_serialized).hexdigest()[:32] 
+        trees_folder = pathlib.Path(p.filesDirectory) / self.DASK_TREES_FOLDER
+        os.makedirs(trees_folder, exist_ok=True)
+        serialized_tree_file_path = trees_folder/f"{serialization_hash}.pkl"
+        with open(serialized_tree_file_path, "wb") as f:
+            f.write(dask_tree_serialized)
+        return serialized_tree_file_path
+
+
+    def load_xarray(self, path):
+        """checks if the path contains the pickled dask tassk and loads it correctly if it is. Returns xarray and True if path is a pickle, otehrwise False. Raises if neither"""
+        import cloudpickle
+        import magic
+        mimetype=magic.from_file(path, mime=True)
+
+        if mimetype in ['application/x-netcdf', 'application/x-hdf']:
+            return path, False
+        elif mimetype=="application/x-pickle":
+            with open(path, "rb") as f:
+                dask_tree_deserialized = cloudpickle.load(f)
+                return dask_tree_deserialized, True
+        else:
+            raise Exception(f"Expected file to be either netcdf or pickle but got {mimetype}")

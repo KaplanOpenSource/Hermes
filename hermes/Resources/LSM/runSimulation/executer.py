@@ -30,13 +30,14 @@ class runSimulation(abstractExecuter):
     def run(self, **inputs):
         self.logger.info("Starting LSM simulation")
 
-        import hera
+        from hera import toolkitHome
+        from hera.datalayer import Project
         from hera.utils.jsonutils import JSONToConfiguration
 
 
         if 'ProjectName' not in inputs:
             raise Exception("Node wasn't given project name through `ProjectName` parameter")
-        p = hera.datalayer.Project(projectName=inputs['ProjectName'])
+        p = Project(projectName=inputs['ProjectName'])
 
 
         if 'SimulationName' not in inputs:
@@ -45,7 +46,7 @@ class runSimulation(abstractExecuter):
         
         template = inputs.get("Template", "v4-general")
 
-        old_lsm_toolkit = hera.toolkitHome.getToolkit(toolkitName=hera.toolkitHome.LSM, projectName=p.projectName, to_xarray=True, to_database=False, forceKeep=True)
+        old_lsm_toolkit = toolkitHome.getToolkit(toolkitName=toolkitHome.LSM, projectName=p.projectName, to_xarray=True, to_database=False, forceKeep=True)
 
         lsm_template = old_lsm_toolkit.getTemplates(template=template)
         if len(lsm_template) == 0:
@@ -63,4 +64,7 @@ class runSimulation(abstractExecuter):
         depositionRates = inputs.get("depositionRates", None)
         res = lsm_template.run(topography=topography, stations=stations,canopy=canopy,depositionRates=depositionRates, saveMode="DB",simulationName=simulation_name,**sim_params)
 
-        return dict(createPythonClass="createPythonClass",dosageXarray=res.xarray_path)
+        d_file = self.save_dask_tree(p, res.getDosage())
+        c_file = self.save_dask_tree(p, res.getConcentration())
+        
+        return dict(runSimulation="runSimulation",dosageXarray=d_file, concentrationXarray=c_file)
