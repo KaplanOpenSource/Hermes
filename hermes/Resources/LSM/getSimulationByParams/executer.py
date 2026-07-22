@@ -1,3 +1,5 @@
+import os
+
 from ...executers.abstractExecuter import abstractExecuter
 
 
@@ -53,6 +55,19 @@ class getSimulationByParams(abstractExecuter):
         if sim_params == {}:
             self.logger.info("Simulation parameters were not specified, running default template parameters")
 
-        res = lsm_template.getSimulation(simulation_name=simulation_name, **sim_params)
+        res = lsm_template.getSimulations(simulation_name=simulation_name, **sim_params)
 
-        return dict(runSimulation="runSimulation",dosageXarray=res.xarray_path)
+        if len(res)==0:
+            raise Exception("Simulation with associated parameters was not found")
+        if len(res)>1:
+            self.logger.warning("There are multiple simulations under the provided parameters, picking the first one")
+
+        res = res[0]
+        # getX returns dask operations, we pickle those operation to append tasks lazily from next nodes
+        d_dask_tree = res.getDosage()
+        c_dask_tree = res.getConcentration()
+        d_file = self.save_dask_tree(project=p, dask_tree=d_dask_tree)
+        c_file = self.save_dask_tree(project=p, dask_tree=c_dask_tree)
+        
+        return dict(runSimulation="runSimulation",dosageXarray=str(d_file), concentrationXarray=str(c_file))
+
