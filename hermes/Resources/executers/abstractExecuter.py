@@ -162,7 +162,7 @@ class abstractExecuter(loggedObject):
         pass
 
 
-    def save_dask_tree(self, p, dask_tree):
+    def save_dask_tree(self, project, dask_tree):
         """Serializes the dask-task-tree with cloudpickle"""
         import pathlib
         from hashlib import sha256
@@ -172,7 +172,7 @@ class abstractExecuter(loggedObject):
 
         # to avoid duplicate pickles we compute the hash and name the files based on the first chars of the hash
         serialization_hash = sha256(dask_tree_serialized).hexdigest()[:32] 
-        trees_folder = pathlib.Path(p.filesDirectory) / self.DASK_TREES_FOLDER
+        trees_folder = pathlib.Path(project.filesDirectory) / self.DASK_TREES_FOLDER
         os.makedirs(trees_folder, exist_ok=True)
         serialized_tree_file_path = trees_folder/f"{serialization_hash}.pkl"
         with open(serialized_tree_file_path, "wb") as f:
@@ -188,7 +188,7 @@ class abstractExecuter(loggedObject):
 
         if mimetype in ['application/x-netcdf', 'application/x-hdf']:
             return path, False
-        elif mimetype=="application/x-pickle":
+        elif mimetype in ["application/x-pickle", "application/octet-stream"]:
             with open(path, "rb") as f:
                 dask_tree_deserialized = cloudpickle.load(f)
                 return dask_tree_deserialized, True

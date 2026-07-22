@@ -1,3 +1,4 @@
+import logging
 import os
 
 import magic
@@ -27,7 +28,6 @@ class runProtectionPolicy(abstractExecuter):
         )
 
     def run(self, **inputs):
-        self.logger.info("Starting LSM simulation")
 
         if 'ProjectName' not in inputs:
             raise Exception("Node wasn't given project name through `ProjectName` parameter")
@@ -61,17 +61,5 @@ class runProtectionPolicy(abstractExecuter):
         
         policy.addActions({"actions":[{"name": policy_name, "params":policy_desc} for policy_name, policy_desc in policy_dict.items()]})
 
-        # uuid = str(uuid4())
-
-        # @cacheFunction(returnFormat=datatypes.NETCDF_XARRAY, projectName=p.projectName)
-        # def policyComputeCache(_):
-        #     return policy.compute(s.getConcentration(), C="C")
-        # policyComputeCache(uuid)
-        # docs = p.getCacheDocuments(type="functionCacheData", functionName=policyComputeCache.__name__, uuid=[True, uuid])
-        # if len(docs) == 0:
-        #     raise Exception("The policy wasn't saved, aborting")
-        # elif len(docs) > 1:
-        #     raise Exception(f"There is more than one policy saved with the UUID {uuid}, aborting")
-        # doc = docs[0]
         res = policy.compute(conc, C="C", lazy=True)
-        return dict(runProtectionPolicy="runProtectionPolicy",concentrationXarray=self.save_dask_tree(res))
+        return dict(runProtectionPolicy="runProtectionPolicy",concentrationXarray=str(self.save_dask_tree(project=p, dask_tree=res)))

@@ -64,7 +64,7 @@ class runSimulation(abstractExecuter):
         depositionRates = inputs.get("depositionRates", None)
         res = lsm_template.run(topography=topography, stations=stations,canopy=canopy,depositionRates=depositionRates, saveMode="DB",simulationName=simulation_name,**sim_params)
 
-        d_file = self.save_dask_tree(p, res.getDosage())
-        c_file = self.save_dask_tree(p, res.getConcentration())
+        d_file = self.save_dask_tree(project=p, dask_tree=res.getDosage())
+        c_file = self.save_dask_tree(project=p, dask_tree=res.getConcentration())
         
-        return dict(runSimulation="runSimulation",dosageXarray=d_file, concentrationXarray=c_file)
+        return dict(runSimulation="runSimulation",dosageXarray=str(d_file), concentrationXarray=str(c_file))

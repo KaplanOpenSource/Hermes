@@ -62,11 +62,12 @@ class getSimulationByParams(abstractExecuter):
         if len(res)>1:
             self.logger.warning("There are multiple simulations under the provided parameters, picking the first one")
 
+        res = res[0]
         # getX returns dask operations, we pickle those operation to append tasks lazily from next nodes
         d_dask_tree = res.getDosage()
         c_dask_tree = res.getConcentration()
-        d_file = self.save_dask_tree(p, d_dask_tree)
-        c_file = self.save_dask_tree(p, c_dask_tree)
+        d_file = self.save_dask_tree(project=p, dask_tree=d_dask_tree)
+        c_file = self.save_dask_tree(project=p, dask_tree=c_dask_tree)
         
-        return dict(runSimulation="runSimulation",dosageXarray=d_file, concentrationXarray=c_file)
+        return dict(runSimulation="runSimulation",dosageXarray=str(d_file), concentrationXarray=str(c_file))
 
