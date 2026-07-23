@@ -297,11 +297,6 @@ def get_all_node_types(resources_root: str=_resources_root()) -> Dict[str, NodeI
         found_params: Dict[str, NodeParameter] = {}
         found_outputs: Dict[str, NodeOutput] = {}
 
-        if "jsonForm.json" in files:
-            is_node = True
-            for p in extract_params_from_json(os.path.join(root, "jsonForm.json")):
-                found_params[p.name] = p
-
         if "executer.py" in files:
             is_node = True
             params, outputs = extract_params_from_python(os.path.join(root, "executer.py"))
@@ -322,6 +317,14 @@ def get_all_node_types(resources_root: str=_resources_root()) -> Dict[str, NodeI
             for p in extract_params_from_jinja(os.path.join(root, template_file)):
                 if p.name not in found_params:
                     found_params[p.name] = p
+
+        if "jsonForm.json" in files:
+            is_node = True
+            for p in extract_params_from_json(os.path.join(root, "jsonForm.json")):
+                if p.name.lower() in [param.lower() for param in found_params.keys()]:
+                    # unlike jinjaTemplate and executer jsonForm usually hold duplicate params so we need to skip them
+                    continue
+                found_params[p.name] = p
 
         if is_node:
             nodes_info[node_type] = NodeInfo(node_type, list(found_params.values()), list(found_outputs.values()))
