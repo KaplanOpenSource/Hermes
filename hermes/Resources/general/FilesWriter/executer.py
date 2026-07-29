@@ -1,7 +1,7 @@
+import os
+
 from ...executers.abstractExecuter import abstractExecuter
-import errno
-import json
-import os, sys, stat
+
 
 class FilesWriter(abstractExecuter):
 
@@ -10,12 +10,26 @@ class FilesWriter(abstractExecuter):
 
     def _defaultParameters(self):
         return dict(
-            output=["status"],
-            inputs=["classpath", "function"],
+            output=["files"],
+            inputs=["directoryPath", "casePath", "Files", ],
             webGUI=dict(JSONSchema="webGUI/FilesWriter_JSONchema.json",
                         UISchema="webGUI/FilesWriter_UISchema.json"),
             parameters={}
         )
+    
+    @staticmethod
+    def testParamValues(params: dict[str, any]):
+        passed, status_message = abstractExecuter.checkParamType(params, "casePath", str, required=True)
+        if not passed:
+            return passed, status_message
+        passed, status_message = abstractExecuter.checkParamType(params, "directoryPath", str, required=False)
+        if not passed:
+            return passed, status_message
+        passed, status_message = abstractExecuter.checkParamType(params, "Files", dict, required=True)
+        if not passed:
+            return passed, status_message
+
+        return True, ""
 
     def run(self, **inputs):
 
