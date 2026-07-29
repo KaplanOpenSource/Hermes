@@ -23,8 +23,10 @@ class RunOsCommand(abstractExecuter):
             return passed, status_message
         
         if abstractExecuter.isParamTestable(params, "Method"):
-            if params["Method"] == "batchFile" and "batchFile" not in params:
-                return False, "When using batchFile method a 'batchFile' parameter must be specified"
+            if params["Method"] == "batchFile":
+                passed, status_message = abstractExecuter.checkParamType(params, "batchFile", str, True)
+                if not passed:
+                    return passed, status_message
             elif params["Method"] == "Command list":
                 passed, status_message = abstractExecuter.checkParamType(params, "Command", dict, True)
                 if not passed:
