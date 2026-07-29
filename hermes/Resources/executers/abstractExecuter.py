@@ -138,7 +138,7 @@ class abstractExecuter(loggedObject):
         return True, ""
 
     @staticmethod
-    def getValuesForParamName(self):
+    def getValuesForParam(self):
         """
             Tries to get possible values for node params.
 

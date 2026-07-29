@@ -1,10 +1,11 @@
 from ....general import JinjaTransform
 
+
 class RefineMesh(JinjaTransform):
 
     def _defaultParameters(self):
         return dict(
-            output=["status"],
+            output=["openFOAMfile"],
             inputs=["classpath", "function"],
             webGUI=dict(JSONSchema="webGUI/BlockMeshExecuter_JSONchema.json",
                         UISchema="webGUI/BlockMeshExecuter_UISchema.json"),

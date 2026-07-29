@@ -1,16 +1,18 @@
-from ...executers.abstractExecuter import abstractExecuter
-import pathlib
-from jinja2 import Environment, FileSystemLoader, TemplateNotFound
-import os
 import logging
-import copy
+import os
+import pathlib
+
+from jinja2 import Environment, FileSystemLoader, TemplateNotFound
+
+from ...executers.abstractExecuter import abstractExecuter
+
 
 class JinjaTransform(abstractExecuter):
 
     def _defaultParameters(self):
         return dict(
-            output=["status"],
-            inputs=["classpath", "function"],
+            output=["openFOAMfile"],
+            inputs=[],
             webGUI=dict(JSONSchema="webGUI/jinjaExecuter_JSONchema.json",
                         UISchema="webGUI/jinjaExecuter_UISchema.json"),
             parameters={}
