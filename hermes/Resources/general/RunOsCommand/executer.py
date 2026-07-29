@@ -1,17 +1,41 @@
-from ...executers.abstractExecuter import abstractExecuter
 import os
 import stat
+
+from ...executers.abstractExecuter import abstractExecuter
+
 
 class RunOsCommand(abstractExecuter):
 
     def _defaultParameters(self):
         return dict(
-            output=["status"],
-            inputs=["Method", "Command"],
+            output=["commands"],
+            inputs=["Method"],
             webGUI=dict(JSONSchema="webGUI/RunOsCommand_JSONchema.json",
                         UISchema="webGUI/RunOsCommand_UISchema.json"),
             parameters={}
         )
+    
+
+    @staticmethod
+    def testParamValues(params: dict[str, any]):
+        passed, status_message = abstractExecuter.checkParamAgainstList(params, "Method", ["batchFile", "Command list"], True)
+        if not passed:
+            return passed, status_message
+        
+        if abstractExecuter.isParamTestable(params, "Method"):
+            if params["Method"] == "batchFile" and "batchFile" not in params:
+                return False, "When using batchFile method a 'batchFile' parameter must be specified"
+            elif params["Method"] == "Command list":
+                passed, status_message = abstractExecuter.checkParamType(params, "Command", dict, True)
+                if not passed:
+                    return passed, status_message
+        
+
+        passed, status_message = abstractExecuter.checkParamType(params, "changeDirTo", str, False)
+        if not passed:
+            return passed, status_message
+        
+        return True, ""
 
     def run(self, **inputs):
         cwd = os.getcwd()
