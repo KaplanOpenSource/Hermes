@@ -43,7 +43,6 @@ Example executers:
 """
 import abc
 import os
-import pickletools
 
 from hermes.hermesLogging.loggingObject import loggedObject
 
@@ -120,6 +119,37 @@ class abstractExecuter(loggedObject):
         """
         pass
 
+
+    @staticmethod
+    def isReference(s:any)->bool:
+        return isinstance(s,str) and s.startswith("{") and s.endswith('}')
+
+    @staticmethod
+    def testParamValues(self, params):
+        """
+            tests a set of parameter against node implementation.
+
+        :param inputs:
+                The inputs needed for the execution.
+
+        :return:
+                tuple where first value indicates if parameters are valid and second is an error message when params are invalid.
+        """
+        return True, ""
+
+    @staticmethod
+    def getValuesForParamName(self):
+        """
+            Tries to get possible values for node params.
+
+        :param inputs:
+                The inputs needed for the execution.
+
+        :return:
+                tuple where first value indicates if parameters are valid and second is an error message when params are invalid.
+        """
+        return dict()
+
     def json(self):
         """
             Returns the JSON definiton of this executioner
@@ -162,7 +192,26 @@ class abstractExecuter(loggedObject):
         pass
 
 
-    def save_dask_tree(self, project, dask_tree):
+    @staticmethod
+    def isParamTestable(params, param_name):
+        return param_name in params.keys() and not abstractExecuter.isReference(params[param_name])
+    
+    @staticmethod
+    def checkParamType(params, param_name, type, required=False):
+        if param_name not in params.keys():
+            return (False, f"{param_name} is missing") if required else True, ""
+        return True, "" if (abstractExecuter.isReference(params[param_name]) or isinstance(params[param_name], type)) else f"{param_name} must be type({type})"
+    
+    @staticmethod
+    def checkParamAgainstList(params, param_name, availableValues, required=False):
+        if param_name not in params.keys():
+            return (False, f"{param_name} is missing") if required else True, ""
+        if abstractExecuter.isParamTestable(params, param_name):
+            if params[param_name] not in availableValues:
+                return False, f"{param_name.title()} '{params[param_name]}' doesn't exists, choose one of: {", ".join(availableValues)}"
+
+    @staticmethod
+    def save_dask_tree(project, dask_tree):
         """Serializes the dask-task-tree with cloudpickle"""
         import pathlib
         from hashlib import sha256
@@ -172,7 +221,7 @@ class abstractExecuter(loggedObject):
 
         # to avoid duplicate pickles we compute the hash and name the files based on the first chars of the hash
         serialization_hash = sha256(dask_tree_serialized).hexdigest()[:32] 
-        trees_folder = pathlib.Path(project.filesDirectory) / self.DASK_TREES_FOLDER
+        trees_folder = pathlib.Path(project.filesDirectory) / abstractExecuter.DASK_TREES_FOLDER
         os.makedirs(trees_folder, exist_ok=True)
         serialized_tree_file_path = trees_folder/f"{serialization_hash}.pkl"
         with open(serialized_tree_file_path, "wb") as f:
@@ -180,7 +229,8 @@ class abstractExecuter(loggedObject):
         return serialized_tree_file_path
 
 
-    def load_xarray(self, path):
+    @staticmethod
+    def load_xarray(path):
         """checks if the path contains the pickled dask tassk and loads it correctly if it is. Returns xarray and True if path is a pickle, otehrwise False. Raises if neither"""
         import cloudpickle
         import magic
