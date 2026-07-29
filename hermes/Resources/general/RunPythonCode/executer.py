@@ -1,8 +1,9 @@
 import os
-
-from ...executers.abstractExecuter import abstractExecuter
 import pydoc
 import sys
+
+from ...executers.abstractExecuter import abstractExecuter
+
 
 class RunPythonCode(abstractExecuter):
     """
@@ -16,7 +17,7 @@ class RunPythonCode(abstractExecuter):
 
     def _defaultParameters(self):
         return dict(
-            output=["status"],
+            output=["Return"],
 
             inputs=["CodeDirectory","ModulePath", "function"],
             webGUI=dict(JSONSchema="webGUI/pythonExecuter_JSONchema.json",
@@ -24,6 +25,23 @@ class RunPythonCode(abstractExecuter):
             parameters={}
         )
 
+    @staticmethod
+    def testParamValues(params: dict[str, any]):
+        passed, status_message = abstractExecuter.checkParamType(params, "CodeDirectory", str, False)
+        if not passed:
+            return passed, status_message
+
+        for param in ["ModulePath", "ClassName", "MethodName"]:
+            passed, status_message = abstractExecuter.checkParamType(params, param, str, True)
+            if not passed:
+                return passed, status_message
+        
+        passed, status_message = abstractExecuter.checkParamType(params, "Parameters", dict, False)
+        if not passed:
+            return passed, status_message
+        
+        return True, ""
+    
     def run(self, **inputs):
 
         # newobj = pydoc.locate(inputs['classpath'])()
@@ -54,5 +72,5 @@ class RunPythonCode(abstractExecuter):
         #newobj = objcls(full_json)
 
         func   = getattr(newobj,inputs["MethodName"])
-        ret = func(**inputs['Parameters'])
+        ret = func(**inputs.get('Parameters', {}))
         return dict(pythonExecuter="pythonExecuter",Return=ret)
