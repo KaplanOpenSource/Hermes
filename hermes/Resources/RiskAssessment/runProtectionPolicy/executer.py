@@ -27,6 +27,26 @@ class runProtectionPolicy(abstractExecuter):
             parameters={}
         )
 
+    @staticmethod
+    def testParamValues(params: dict[str, any]):
+        passed, status_message = abstractExecuter.checkParamType(params, "ProjectName", str, required=True)
+        if not passed:
+            return passed, status_message
+        
+        passed, status_message = abstractExecuter.checkParamType(params, "policy", dict, required=True)
+        if not passed:
+            return passed, status_message
+        
+        if "LSMDosagePath" not in params and "LSMConcentrationPath" not in params:
+            return False, "Protection policy calculation requires LSM simulation results path through `LSMConcentrationPath` or `LSMDosagePath` parameter"
+
+        for param in ["LSMDosagePath", "LSMConcentrationPath"]:
+            passed, status_message = abstractExecuter.checkParamType(params, param, str, required=False)
+            if not passed:
+                return passed, status_message
+        
+        return True, ""
+
     def run(self, **inputs):
 
         if 'ProjectName' not in inputs:

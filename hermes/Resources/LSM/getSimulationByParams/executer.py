@@ -19,11 +19,47 @@ class getSimulationByParams(abstractExecuter):
             output=[],
 
             inputs=["ProjectName","Template", "SimulationParameters", "SimulationName"],
-            # possible_simulation_params = ['TopoFile', 'flat', 'TopoXmin', 'TopoXmax', 'TopoYmin', 'TopoYmax', 'TopoXn', 'TopoYn', 'sourceRatioX', 'sourceRatioY', 'releaseDuration', 'releaseHeight', 'windSpeed', 'windDir', 'inversionHeight', 'savedt', 'duration', 'nParticles', 'savedx', 'savedy', 'savedz', 'StationsFile', 'homogeneousWind', 'particles3D', 'wind3D', 'n_vdep', 'lineSource', 'stability']
             webGUI={},
             parameters={}
         )
 
+    @staticmethod
+    def testParamValues(params: dict[str, any]):
+        possible_simulation_params = ['TopoFile', 'flat', 'TopoXmin', 'TopoXmax', 'TopoYmin', 'TopoYmax', 'TopoXn', 'TopoYn', 'sourceRatioX', 'sourceRatioY', 'releaseDuration', 'releaseHeight', 'windSpeed', 'windDir', 'inversionHeight', 'savedt', 'duration', 'nParticles', 'savedx', 'savedy', 'savedz', 'StationsFile', 'homogeneousWind', 'particles3D', 'wind3D', 'n_vdep', 'lineSource', 'stability']
+
+        for param in ["ProjectName", "SimulationName"]:
+            passed, status_message = abstractExecuter.checkParamType(params, param, str, required=True)
+            if not passed:
+                return passed, status_message
+        
+        passed, status_message = abstractExecuter.checkParamType(params, "Template", str, required=False)
+        if not passed:
+            return passed, status_message
+        
+        if abstractExecuter.isParamTestable(params, "ProjectName"):
+            import hera
+            from hera.datalayer.project import getProjectList
+            passed, status_message = abstractExecuter.checkParamAgainstList(params, "ProjectName", getProjectList(), False)
+            if not passed:
+                return passed, status_message
+            lsm_tk = hera.toolkitHome.getToolkit(hera.toolkitHome.LSM, projectName=params["ProjectName"])
+            abstractExecuter.checkParamAgainstList(params, "Template", list(lsm_tk.getTemplatesTable().template), False)
+            if not passed:
+                return passed, status_message
+        
+
+        if abstractExecuter.isParamTestable(params, "SimulationParameters"):
+            passed, status_message = abstractExecuter.checkParamType(params, "SimulationParameters", dict, required=False)
+            if not passed:
+                return passed, status_message
+            for simParam in params['SimulationParameters']:
+                passed, status_message = abstractExecuter.checkParamAgainstList(simParam, simParam, possible_simulation_params, required=False)
+                if not passed:
+                    return passed, status_message
+        
+        return True, ""
+
+    
     def run(self, **inputs):
         self.logger.info("Starting LSM simulation")
 

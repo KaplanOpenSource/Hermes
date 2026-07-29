@@ -6,26 +6,69 @@ class runSimulation(abstractExecuter):
         Runs a Fortran LSM simulation.
 
         inputs:
-            ProjectName : str, The class path string to the class
-            Template : str, The class path string to the class
-            SimulationParameters : str, The class path string to the class
-            SimulationName : str, The class path string to the class
-            saveMode : str, The class path string to the class
-            topography : str, The class path string to the class
-            stations : str, The class path string to the class
-            canopy  : str, The name of the function to run .
-            depositionRates : dict, The parameters for the function.
+            ProjectName : str, The hera project name to run the simulation under
+            Template : str, The name of the template to use
+            SimulationParameters : dict, Simulation parameters to apply on the template
+            SimulationName : str, The name of the simulation
+            topography : str, Path to topography file if needed
+            stations : str, Path to stations data if needed
+            canopy  : str, The name of the function to run
+            depositionRates : int, depositionRate(default is 0 meaning no deposition) 
     """
 
     def _defaultParameters(self):
         return dict(
             output=[],
 
-            inputs=["ProjectName","Template", "SimulationParameters", "SimulationName", "saveMode", "topography", "stations", "canopy", "depositionRates"],
-            # possible_simulation_params = ['TopoFile', 'flat', 'TopoXmin', 'TopoXmax', 'TopoYmin', 'TopoYmax', 'TopoXn', 'TopoYn', 'sourceRatioX', 'sourceRatioY', 'releaseDuration', 'releaseHeight', 'windSpeed', 'windDir', 'inversionHeight', 'savedt', 'duration', 'nParticles', 'savedx', 'savedy', 'savedz', 'StationsFile', 'homogeneousWind', 'particles3D', 'wind3D', 'n_vdep', 'lineSource', 'stability']
+            inputs=["ProjectName","Template", "SimulationParameters", "SimulationName", "topography", "stations", "canopy", "depositionRates"],
             webGUI={},
             parameters={}
         )
+
+    @staticmethod
+    def testParamValues(params: dict[str, any]):
+        possible_simulation_params = ['TopoFile', 'flat', 'TopoXmin', 'TopoXmax', 'TopoYmin', 'TopoYmax', 'TopoXn', 'TopoYn', 'sourceRatioX', 'sourceRatioY', 'releaseDuration', 'releaseHeight', 'windSpeed', 'windDir', 'inversionHeight', 'savedt', 'duration', 'nParticles', 'savedx', 'savedy', 'savedz', 'StationsFile', 'homogeneousWind', 'particles3D', 'wind3D', 'n_vdep', 'lineSource', 'stability']
+
+        for param in ["ProjectName", "SimulationName"]:
+            passed, status_message = abstractExecuter.checkParamType(params, param, str, required=True)
+            if not passed:
+                return passed, status_message
+        
+        passed, status_message = abstractExecuter.checkParamType(params, "Template", str, required=False)
+        if not passed:
+            return passed, status_message
+        
+        if abstractExecuter.isParamTestable(params, "ProjectName"):
+            import hera
+            from hera.datalayer.project import getProjectList
+            passed, status_message = abstractExecuter.checkParamAgainstList(params, "ProjectName", getProjectList(), False)
+            if not passed:
+                return passed, status_message
+            lsm_tk = hera.toolkitHome.getToolkit(hera.toolkitHome.LSM, projectName=params["ProjectName"])
+            abstractExecuter.checkParamAgainstList(params, "Template", list(lsm_tk.getTemplatesTable().template), False)
+            if not passed:
+                return passed, status_message
+        
+
+        if abstractExecuter.isParamTestable(params, "SimulationParameters"):
+            passed, status_message = abstractExecuter.checkParamType(params, "SimulationParameters", dict, required=False)
+            if not passed:
+                return passed, status_message
+            for simParam in params['SimulationParameters']:
+                passed, status_message = abstractExecuter.checkParamAgainstList(simParam, simParam, possible_simulation_params, required=False)
+                if not passed:
+                    return passed, status_message
+
+        for param in ["topography","stations","canopy"]:
+            passed, status_message = abstractExecuter.checkParamType(params, param, str, required=False)
+            if not passed:
+                return passed, status_message
+
+        passed, status_message = abstractExecuter.checkParamType(params, "depositionRates", (int, float), required=False)
+        if not passed:
+            return passed, status_message
+
+        return True, ""
 
     def run(self, **inputs):
         self.logger.info("Starting LSM simulation")

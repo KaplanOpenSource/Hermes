@@ -1,17 +1,30 @@
-from ...executers.abstractExecuter import abstractExecuter
+import os
 import shutil
-import os, sys, stat
+import stat
+import sys
+
+from ...executers.abstractExecuter import abstractExecuter
+
 
 class CopyDirectory(abstractExecuter):
 
     def _defaultParameters(self):
         return dict(
-            output=["status"],
-            inputs=["source","target"],
+            output=["Source,Target"],
+            inputs=["Source","Target"],
             webGUI=dict(JSONSchema="webGUI/copyDirectory_JSONchema.json",
                         UISchema  = "webGUI/copyDirectory_UISchema.json"),
             parameters={}
         )
+    
+    @staticmethod
+    def testParamValues(params: dict[str, any]):
+        for param in ["Source", "Target"]:
+            passed, status_message = abstractExecuter.checkParamType(params, param, str, required=True)
+            if not passed:
+                return passed, status_message
+
+        return True, ""
 
     def run(self, **inputs):
         if (len(inputs["Source"]) > 0 and len(inputs["Target"]) > 0):
