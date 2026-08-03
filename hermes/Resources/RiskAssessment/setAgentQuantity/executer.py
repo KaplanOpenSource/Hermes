@@ -113,4 +113,4 @@ class setAgentQuantity(abstractExecuter):
             xarr['C'] = conc_factor*xarr['C']
 
 
-        return dict(runProtectionPolicy="runProtectionPolicy",concentrationXarray=str(self.save_dask_tree(project=p, dask_tree=xarr)))
+        return dict(setAgentQuantity="setAgentQuantity",xarray=str(self.save_dask_tree(project=p, dask_tree=xarr)))
