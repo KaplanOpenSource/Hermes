@@ -13,8 +13,8 @@ class runProtectionPolicy(abstractExecuter):
 
         inputs:
             ProjectName : str, The class path string to the class
-            LSMDosagePath : str, path to file containing the dosage used in policy protection calculation
-            LSMConcentrationPath : str, path to file containing the concentration used in policy protection calculation
+            LSMDosage : str, path to file containing the dosage used in policy protection calculation
+            LSMConcentration : str, path to file containing the concentration used in policy protection calculation
             policy : dict, dictionary of the policies to be applied
     """
 
@@ -22,7 +22,7 @@ class runProtectionPolicy(abstractExecuter):
         return dict(
             output=[],
 
-            inputs=["ProjectName","LSMDosagePath", "LSMConcentrationPath", "policy"],
+            inputs=["ProjectName","LSMDosage", "LSMConcentration", "policy"],
             webGUI={},
             parameters={}
         )
@@ -37,10 +37,10 @@ class runProtectionPolicy(abstractExecuter):
         if not passed:
             return passed, status_message
         
-        if "LSMDosagePath" not in params and "LSMConcentrationPath" not in params:
-            return False, "Protection policy calculation requires LSM simulation results path through `LSMConcentrationPath` or `LSMDosagePath` parameter"
+        if "LSMDosage" not in params and "LSMConcentration" not in params:
+            return False, "Protection policy calculation requires LSM simulation results path through `LSMConcentration` or `LSMDosage` parameter"
 
-        for param in ["LSMDosagePath", "LSMConcentrationPath"]:
+        for param in ["LSMDosage", "LSMConcentration"]:
             passed, status_message = abstractExecuter.checkParamType(params, param, str, required=False)
             if not passed:
                 return passed, status_message
@@ -59,18 +59,14 @@ class runProtectionPolicy(abstractExecuter):
         from hera.simulations.LSM.singleSimulation import SingleSimulation
 
         p = Project(projectName=inputs['ProjectName'])
-        if 'LSMDosagePath' in inputs:
-            pickled_xarray, is_pickle = self.load_xarray(inputs["LSMDosagePath"])
+        if 'LSMDosage' in inputs:
+            pickled_xarray, _ = self.load_xarray(inputs["LSMDosage"])
 
-            conc = SingleSimulation(pickled_xarray if is_pickle else inputs['LSMDosagePath']).getConcentration()
-        elif 'LSMConcentrationPath' not in inputs:
-            pickled_xarray, is_pickle = self.load_xarray(inputs["LSMConcentrationPath"])
-            if is_pickle:
-                conc = pickled_xarray
-            else:
-                conc = xarray.open_mfdataset(inputs["LSMConcentrationPath"], combine='by_coords')
+            conc = SingleSimulation(pickled_xarray).getConcentration()
+        elif 'LSMConcentration' not in inputs:
+            conc, _ = self.load_xarray(inputs["LSMConcentration"])
         else:
-            raise Exception("Node wasn't given LSM simulation results path through `LSMConcentrationPath` or `LSMDosagePath` parameter")
+            raise Exception("Node wasn't given LSM simulation results path through `LSMConcentration` or `LSMDosage` parameter")
 
         
         policy = ProtectionPolicy()

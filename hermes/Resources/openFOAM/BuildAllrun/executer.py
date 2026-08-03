@@ -1,14 +1,16 @@
-from hermes.Resources.executers.abstractExecuter import abstractExecuter
-import shutil
-import os, sys, stat
+import os
+
 import numpy
+
+from hermes.Resources.executers.abstractExecuter import abstractExecuter
+
 
 class BuildAllrun(abstractExecuter):
 
     def _defaultParameters(self):
         return dict(
-            output=["status"],
-            inputs=["source","target"],
+            output=[],
+            inputs=["casePath", "caseExecution", "parallelCase", "runFile"],
             webGUI=dict(),
             parameters={}
         )

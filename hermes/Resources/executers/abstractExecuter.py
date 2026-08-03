@@ -138,7 +138,7 @@ class abstractExecuter(loggedObject):
         return True, ""
 
     @staticmethod
-    def getValuesForParamName(self):
+    def getValuesForParam(self):
         """
             Tries to get possible values for node params.
 
@@ -230,14 +230,15 @@ class abstractExecuter(loggedObject):
 
 
     @staticmethod
-    def load_xarray(path):
+    def load_xarray(path:str):
         """checks if the path contains the pickled dask tassk and loads it correctly if it is. Returns xarray and True if path is a pickle, otehrwise False. Raises if neither"""
         import cloudpickle
         import magic
+        import xarray
         mimetype=magic.from_file(path, mime=True)
 
         if mimetype in ['application/x-netcdf', 'application/x-hdf']:
-            return path, False
+            return xarray.open_mfdataset(path, combine='by_coords'), False
         elif mimetype in ["application/x-pickle", "application/octet-stream"]:
             with open(path, "rb") as f:
                 dask_tree_deserialized = cloudpickle.load(f)
