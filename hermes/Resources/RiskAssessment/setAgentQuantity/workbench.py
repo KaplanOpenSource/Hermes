@@ -18,9 +18,11 @@ class RunPythonCode(WebGuiNode):
         ''' convert the json data to "input_parameters" structure '''
 
         parameters = dict()
-        parameters["ProjectName"] = obj.ProjectName
-        parameters["LSMPath"] = obj.LSMPath
-        parameters["policy"] = obj.policy
+        parameters["LSMDosage"] = obj.LSMDosage
+        parameters["LSMConcentration"] = obj.LSMConcentration
+        parameters["Quantity"] = obj.Quantity
+        parameters["MassUnits"] = obj.MassUnits
+        parameters["TimeUnits"] = obj.TimeUnits
         if "formData" in self.nodeData["WebGui"]:
             parameters["Parameters"] = self.nodeData["WebGui"]["formData"]
 
@@ -30,10 +32,11 @@ class RunPythonCode(WebGuiNode):
     def executeToGui(self, obj, parameters):
         ''' import the "input_parameters" data into the json obj data '''
 
-        obj.ProjectName = parameters["ProjectName"]
-        obj.LSMPath = parameters["LSMPath"]
-        obj.policy = parameters["policy"]
-        obj.Parameters = parameters["Parameters"]
+        obj.LSMDosage = parameters["LSMDosage"]
+        obj.LSMConcentration = parameters["LSMConcentration"]
+        obj.Quantity = parameters["Quantity"]
+        obj.MassUnits = parameters["MassUnits"]
+        obj.TimeUnits = parameters["TimeUnits"]
 
         if len(parameters["Parameters"]) > 0:
             self.nodeData["WebGui"]["formData"] = parameters["Parameters"]
