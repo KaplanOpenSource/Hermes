@@ -194,7 +194,7 @@ class abstractExecuter(loggedObject):
 
     @staticmethod
     def isParamTestable(params, param_name):
-        return param_name in params.keys() and not abstractExecuter.isReference(params[param_name])
+        return param_name in params and not abstractExecuter.isReference(params[param_name])
     
     @staticmethod
     def checkParamType(params, param_name, type, required=False):

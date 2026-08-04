@@ -25,8 +25,8 @@ class setAgentQuantity(abstractExecuter):
 
     @staticmethod
     def testParamValues(params: dict[str, any]):        
-        if "LSMDosage" not in params and "LSMConcentration" not in params:
-            return False, "Setting simulation's Quantity requires LSM simulation results path through `LSMConcentration` or `LSMDosage` parameter"
+        if ("LSMDosage" in params) ^ ("LSMConcentration" in params):
+            return False, "Setting simulation's Quantity requires LSM simulation results path exclusively through `LSMConcentration` or `LSMDosage` parameter"
 
         for param in ["LSMDosage", "LSMConcentration"]:
             passed, status_message = abstractExecuter.checkParamType(params, param, str, required=False)
@@ -56,7 +56,7 @@ class setAgentQuantity(abstractExecuter):
 
         if 'LSMDosage' in inputs:
             xarr, _ = self.load_xarray(inputs["LSMDosage"])
-        elif 'LSMConcentration' not in inputs:
+        elif 'LSMConcentration' in inputs:
             xarr, _ = self.load_xarray(inputs["LSMConcentration"])
         else:
             raise Exception("Node wasn't given LSM simulation results path through `LSMConcentration` or `LSMDosage` parameter")
@@ -70,7 +70,7 @@ class setAgentQuantity(abstractExecuter):
         if not isinstance(mass_units, str):
             raise Exception("MassUnits must be a string specifying mass units to use in xarray")
         time_units = inputs.get('TimeUnits', "kg")
-        if not isinstance(mass_units, str):
+        if not isinstance(time_units, str):
             raise Exception("TimeUnits must be a string specifying time units to use in xarray")
         
         

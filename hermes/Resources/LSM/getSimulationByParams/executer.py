@@ -1,5 +1,3 @@
-import os
-
 from ...executers.abstractExecuter import abstractExecuter
 
 
