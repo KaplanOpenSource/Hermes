@@ -1,7 +1,5 @@
 import os
 import shutil
-import stat
-import sys
 
 from ...executers.abstractExecuter import abstractExecuter
 

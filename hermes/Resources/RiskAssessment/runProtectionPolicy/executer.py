@@ -1,9 +1,3 @@
-import logging
-import os
-
-import magic
-import xarray
-
 from ...executers.abstractExecuter import abstractExecuter
 
 
@@ -33,11 +27,17 @@ class runProtectionPolicy(abstractExecuter):
         if not passed:
             return passed, status_message
         
+        if abstractExecuter.isParamTestable(params, "ProjectName"):
+            from hera.datalayer.project import getProjectList
+            passed, status_message = abstractExecuter.checkParamAgainstList(params, "ProjectName", getProjectList(), False)
+            if not passed:
+                return passed, status_message
+        
         passed, status_message = abstractExecuter.checkParamType(params, "policy", dict, required=True)
         if not passed:
             return passed, status_message
         
-        if "LSMDosage" not in params and "LSMConcentration" not in params:
+        if ("LSMDosage" in params) ^ ("LSMConcentration" in params):
             return False, "Protection policy calculation requires LSM simulation results path through `LSMConcentration` or `LSMDosage` parameter"
 
         for param in ["LSMDosage", "LSMConcentration"]:
@@ -63,7 +63,7 @@ class runProtectionPolicy(abstractExecuter):
             pickled_xarray, _ = self.load_xarray(inputs["LSMDosage"])
 
             conc = SingleSimulation(pickled_xarray).getConcentration()
-        elif 'LSMConcentration' not in inputs:
+        elif 'LSMConcentration' in inputs:
             conc, _ = self.load_xarray(inputs["LSMConcentration"])
         else:
             raise Exception("Node wasn't given LSM simulation results path through `LSMConcentration` or `LSMDosage` parameter")
