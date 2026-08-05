@@ -231,7 +231,7 @@ class abstractExecuter(loggedObject):
 
     @staticmethod
     def load_xarray(path:str):
-        """checks if the path contains the pickled dask tassk and loads it correctly if it is. Returns xarray and True if path is a pickle, otehrwise False. Raises if neither"""
+        """checks if the path contains the pickled dask task and loads it correctly if it is. Returns xarray and True if path is a pickle, otehrwise False. Raises if neither"""
         import cloudpickle
         import magic
         import xarray
