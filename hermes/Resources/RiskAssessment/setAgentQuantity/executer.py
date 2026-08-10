@@ -49,6 +49,10 @@ class setAgentQuantity(abstractExecuter):
 
     def run(self, **inputs):
         from hera.datalayer import Project
+        from hera.utils.unitHandler import ureg
+        from pint import set_application_registry
+        set_application_registry(ureg)
+
 
         if 'ProjectName' not in inputs:
             raise Exception("Node wasn't given project name through `ProjectName` parameter")
@@ -75,7 +79,6 @@ class setAgentQuantity(abstractExecuter):
         
         
         
-        from hera.utils.unitHandler import ureg
         quantity = ureg.parse_expression((quantity))
         mass_units = ureg.parse_units(mass_units)
         time_units = ureg.parse_units(time_units)
@@ -96,6 +99,9 @@ class setAgentQuantity(abstractExecuter):
             dosage_factor = (quantity.to(mass_units) * ureg.min / ureg.m ** 3).m_as(mass_units * time_units / ureg.m ** 3)
             conc_factor = (quantity.to(mass_units) / ureg.m ** 3).m_as(mass_units / ureg.m ** 3)
         else:
+            xarr.attrs['dt']
+            xarr.attrs['Q']=ureg.parse_expression(xarr.attrs['Q'])
+            xarr.attrs['C']
             previous_dosage_factor = (xarr.attrs['Q'] * ureg.min / ureg.m ** 3).m_as(xarr.attrs['Q'].units * xarr.attrs['dt'].units / ureg.m ** 3)
             new_dosage_factor = (quantity.to(mass_units) * ureg.min / ureg.m ** 3).m_as(mass_units * time_units / ureg.m ** 3)
             dosage_factor = new_dosage_factor/previous_dosage_factor
