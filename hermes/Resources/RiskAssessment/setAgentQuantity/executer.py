@@ -18,7 +18,7 @@ class setAgentQuantity(abstractExecuter):
         return dict(
             output=[],
 
-            inputs=["LSMDosage", "LSMConcentration", "Quantity", "MassUnits", "TimeUnits"],
+            inputs=["ProjectName", "LSMDosage", "LSMConcentration", "Quantity", "MassUnits", "TimeUnits"],
             webGUI={},
             parameters={}
         )
