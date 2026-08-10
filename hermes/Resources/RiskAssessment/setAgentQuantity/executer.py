@@ -112,7 +112,8 @@ class setAgentQuantity(abstractExecuter):
         if "LSMDosage" in inputs:
             xarr['Dosage'] = dosage_factor*xarr['Dosage']
         elif "LSMConcentration" in inputs:
-            xarr['dDosage'] = dosage_factor*xarr['dDosage']
+            if 'dDosage' in xarr:
+                xarr['dDosage'] = dosage_factor*xarr['dDosage']
             xarr['C'] = conc_factor*xarr['C']
 
 
