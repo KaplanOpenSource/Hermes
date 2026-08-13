@@ -85,7 +85,7 @@ t
 
     @classmethod
     def parsePath(cls, parameter):
-        """
+        r"""
             Determine which parts of the input are path to parse and which
             stay as they are.
 

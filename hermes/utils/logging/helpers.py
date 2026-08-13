@@ -3,7 +3,7 @@ import logging
 import logging.config
 import os.path
 import pathlib
-from importlib.resources import read_text
+from importlib.resources import files
 
 HERMES_DEFAULT_LOG_DIR = pathlib.Path.home() / ".pyhermes" / "log"
 
@@ -28,7 +28,7 @@ def get_classMethod_logger(instance, name=None):
 def get_default_logging_config(*, disable_existing_loggers: bool = False) -> dict:
     defaultLocalConfig = os.path.join(HERMES_DEFAULT_LOG_DIR, 'hermesLogging.config')
     if not os.path.isfile(defaultLocalConfig):
-        defaultConfig = read_text('hermes.utils.logging', 'hermesLogging.config')
+        defaultConfig = files('hermes.utils.logging').joinpath('hermesLogging.config').read_text()
         with open(defaultLocalConfig,'w') as localConfig:
             localConfig.write(defaultConfig)
 
