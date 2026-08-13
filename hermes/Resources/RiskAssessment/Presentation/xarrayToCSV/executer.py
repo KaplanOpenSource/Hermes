@@ -1,4 +1,4 @@
-from ...executers.abstractExecuter import abstractExecuter
+from ....executers.abstractExecuter import abstractExecuter
 
 
 class xarrayToCSV(abstractExecuter):
@@ -41,8 +41,7 @@ class xarrayToCSV(abstractExecuter):
         If the input is a serialized lazy Xarray/Dask tree, it is
         materialized before being converted to CSV.
         """
-        import os
-        import xarray
+        from pathlib import Path
 
         if 'Xarray' not in inputs:
             raise Exception(
@@ -53,34 +52,19 @@ class xarrayToCSV(abstractExecuter):
             raise Exception(
                 "Node wasn't given an output path through the `OutputPath` parameter"
             )
+        output_path = inputs['OutputPath']
 
         xarr, is_lazy = self.load_xarray(inputs['Xarray'])
 
-        # Materialize lazy Xarray/Dask computation.
         if is_lazy:
-            xarr = xarr.compute()
-
-        # Convert DataArray to Dataset so both Dataset and DataArray
-        # can be handled uniformly.
-        if isinstance(xarr, xarray.DataArray):
-            xarr = xarr.to_dataset()
-
-        if not isinstance(xarr, xarray.Dataset):
-            raise Exception(
-                f"Expected an Xarray Dataset or DataArray, got {type(xarr)}"
-            )
-
-        output_path = inputs['OutputPath']
-
-        os.makedirs(
-            os.path.dirname(output_path) or '.',
-            exist_ok=True
-        )
-
-        # Convert Xarray to Pandas DataFrame and save as CSV.
-        df = xarr.to_dataframe()
+            df = xarr.to_dask_dataframe()
+            path = Path(output_path)
+            if '*' not in path.name:
+                output_path = str(path.with_name(f"{path.stem}-*.{path.suffix}"))
+        else:
+            df = xarr.to_dataframe()
         df.to_csv(output_path)
 
         return dict(
-            csv=output_path
+            csvPath=output_path
         )
