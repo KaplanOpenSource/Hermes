@@ -88,4 +88,8 @@ class calculateThresholds(abstractExecuter):
         calculator = getattr(agent, inputs["Calculator"])
         risk_areas = calculator.calculateRegionOfInjured(xarr, "C")
 
-        return dict(setAgentQuantity="setAgentQuantity",xarray=str(self.save_geopandas(project=p, dask_tree=risk_areas)))
+        xarr_path = str(self.save_geopandas(project=p, saved_obj=risk_areas))
+        with open("temp.txt", "w") as f:
+            f.write(f"writing to {xarr_path} hoping that it contains something like: {risk_areas}")
+
+        return dict(setAgentQuantity="setAgentQuantity",xarray=xarr_path)
