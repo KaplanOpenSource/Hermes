@@ -15,7 +15,6 @@ class calculateThresholds(abstractExecuter):
     def _defaultParameters(self):
         return dict(
             output=[],
-
             inputs=["ProjectName", "LSMConcentration", "Agent", "Calculator"],
             webGUI={},
             parameters={}
@@ -61,10 +60,11 @@ class calculateThresholds(abstractExecuter):
         return True, ""
 
     def run(self, **inputs):
+        from pint import set_application_registry
+
         from hera import toolkitHome
         from hera.datalayer import Project
         from hera.utils.unitHandler import ureg
-        from pint import set_application_registry
         set_application_registry(ureg)
 
         if 'ProjectName' not in inputs:
@@ -84,7 +84,7 @@ class calculateThresholds(abstractExecuter):
         if 'Calculator' not in inputs:
             raise Exception("Node wasn't given calculator name through `Calculator` parameter")
         if inputs["Calculator"] not in agent.effectNames:
-            raise Exception(f"Calculator {inputs["Calculator"]} isn't defined for agent {agent}, choose one of: {', '.join(agent.effectNames)}")
+            raise Exception(f"Calculator {inputs['Calculator']} isn't defined for agent {agent}, choose one of: {', '.join(agent.effectNames)}")
         calculator = getattr(agent, inputs["Calculator"])
         risk_areas = calculator.calculateRegionOfInjured(xarr, "C")
 
