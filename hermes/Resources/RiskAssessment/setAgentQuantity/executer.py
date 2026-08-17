@@ -95,7 +95,7 @@ class setAgentQuantity(abstractExecuter):
 
             xarr.attrs['dt'] = dt_minutes.to(time_units)
             xarr.attrs['Q']  = quantity.to(mass_units)
-            xarr.attrs['C']  = mass_units/ ureg.m ** 3
+            xarr.attrs['C']  = 1*mass_units/ ureg.m ** 3
             dosage_factor = (quantity.to(mass_units) * ureg.min / ureg.m ** 3).m_as(mass_units * time_units / ureg.m ** 3)
             conc_factor = (quantity.to(mass_units) / ureg.m ** 3).m_as(mass_units / ureg.m ** 3)
         else:
@@ -108,7 +108,7 @@ class setAgentQuantity(abstractExecuter):
             conc_factor = new_conc_factor/previous_conc_factor
             xarr.attrs['dt'] = xarr.attrs['dt'].to(time_units)
             xarr.attrs['Q']  = quantity.to(mass_units)
-            xarr.attrs['C']  = mass_units/ ureg.m ** 3
+            xarr.attrs['C']  = 1*mass_units/ ureg.m ** 3
         if "LSMDosage" in inputs:
             xarr['Dosage'] = dosage_factor*xarr['Dosage']
         elif "LSMConcentration" in inputs:
