@@ -44,6 +44,7 @@ Example executers:
 import abc
 import os
 
+import joblib
 from geopandas import GeoDataFrame
 
 from hermes.hermesLogging.loggingObject import loggedObject
@@ -232,15 +233,14 @@ class abstractExecuter(loggedObject):
         return serialized_tree_file_path
 
     @staticmethod
-    def save_geopandas(project, saved_obj: GeoDataFrame):
+    def save_geopandas(project, saved_obj: GeoDataFrame, filename):
         """Serializes the dask-task-tree with cloudpickle"""
         import pathlib
 
         # to avoid duplicate pickles we compute the hash and name the files based on the first chars of the hash
-        serialization_hash = saved_obj.__hash__()
         geopandas_folder = pathlib.Path(project.filesDirectory) / abstractExecuter.GEOPANDAS_FOLDER
         os.makedirs(geopandas_folder, exist_ok=True)
-        serialized_geopandas_file_path = geopandas_folder/f"geopanda-{serialization_hash}.parquet"
+        serialized_geopandas_file_path = geopandas_folder/f"geopanda-{filename}.parquet"
         saved_obj.to_parquet(serialized_geopandas_file_path)
         return serialized_geopandas_file_path
 

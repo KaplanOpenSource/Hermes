@@ -60,11 +60,10 @@ class calculateThresholds(abstractExecuter):
         return True, ""
 
     def run(self, **inputs):
-        from pint import set_application_registry
-
         from hera import toolkitHome
         from hera.datalayer import Project
         from hera.utils.unitHandler import ureg
+        from pint import set_application_registry
         set_application_registry(ureg)
 
         if 'ProjectName' not in inputs:
@@ -86,10 +85,12 @@ class calculateThresholds(abstractExecuter):
         if inputs["Calculator"] not in agent.effectNames:
             raise Exception(f"Calculator {inputs['Calculator']} isn't defined for agent {agent}, choose one of: {', '.join(agent.effectNames)}")
         calculator = getattr(agent, inputs["Calculator"])
-        risk_areas = calculator.calculateRegionOfInjured(xarr, "C")
 
-        xarr_path = str(self.save_geopandas(project=p, saved_obj=risk_areas))
+        from hera.datalayer import autocache
+        
+        risk_areas, doc = autocache.cacheFunction(calculator.calculateRegionOfInjured, returnDoc=True)(xarr, "C")
+
         with open("temp.txt", "w") as f:
-            f.write(f"writing to {xarr_path} hoping that it contains something like: {risk_areas}")
+            f.write(f"writing to {doc.resource} hoping that it contains something like: {doc}")
 
-        return dict(setAgentQuantity="setAgentQuantity",xarray=xarr_path)
+        return dict(setAgentQuantity="setAgentQuantity",xarray=doc.resource)
