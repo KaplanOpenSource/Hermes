@@ -86,9 +86,10 @@ class calculateThresholds(abstractExecuter):
             raise Exception(f"Calculator {inputs['Calculator']} isn't defined for agent {agent}, choose one of: {', '.join(agent.effectNames)}")
         calculator = getattr(agent, inputs["Calculator"])
 
-        from hera.datalayer import autocache
+        from hera.datalayer import autocache, datatypes
         
-        risk_areas, doc = autocache.cacheFunction(calculator.calculateRegionOfInjured, returnDoc=True)(xarr, "C")
+        _, doc = autocache.cacheFunction(calculator.calculateRegionOfInjured, returnFormat=datatypes.GEOPANDAS,
+                                         projectName=p.projectName, returnDoc=True)(xarr, "C")
 
         with open("temp.txt", "w") as f:
             f.write(f"writing to {doc.resource} hoping that it contains something like: {doc}")
