@@ -49,6 +49,10 @@ class setAgentQuantity(abstractExecuter):
 
     def run(self, **inputs):
         from hera.datalayer import Project
+        from hera.utils.unitHandler import ureg
+        from pint import set_application_registry
+        set_application_registry(ureg)
+
 
         if 'ProjectName' not in inputs:
             raise Exception("Node wasn't given project name through `ProjectName` parameter")
@@ -75,7 +79,6 @@ class setAgentQuantity(abstractExecuter):
         
         
         
-        from hera.utils.unitHandler import ureg
         quantity = ureg.parse_expression((quantity))
         mass_units = ureg.parse_units(mass_units)
         time_units = ureg.parse_units(time_units)
@@ -92,7 +95,7 @@ class setAgentQuantity(abstractExecuter):
 
             xarr.attrs['dt'] = dt_minutes.to(time_units)
             xarr.attrs['Q']  = quantity.to(mass_units)
-            xarr.attrs['C']  = mass_units/ ureg.m ** 3
+            xarr.attrs['C']  = 1*mass_units/ ureg.m ** 3
             dosage_factor = (quantity.to(mass_units) * ureg.min / ureg.m ** 3).m_as(mass_units * time_units / ureg.m ** 3)
             conc_factor = (quantity.to(mass_units) / ureg.m ** 3).m_as(mass_units / ureg.m ** 3)
         else:
@@ -105,11 +108,12 @@ class setAgentQuantity(abstractExecuter):
             conc_factor = new_conc_factor/previous_conc_factor
             xarr.attrs['dt'] = xarr.attrs['dt'].to(time_units)
             xarr.attrs['Q']  = quantity.to(mass_units)
-            xarr.attrs['C']  = mass_units/ ureg.m ** 3
+            xarr.attrs['C']  = 1*mass_units/ ureg.m ** 3
         if "LSMDosage" in inputs:
             xarr['Dosage'] = dosage_factor*xarr['Dosage']
         elif "LSMConcentration" in inputs:
-            xarr['dDosage'] = dosage_factor*xarr['dDosage']
+            if 'dDosage' in xarr:
+                xarr['dDosage'] = dosage_factor*xarr['dDosage']
             xarr['C'] = conc_factor*xarr['C']
 
 

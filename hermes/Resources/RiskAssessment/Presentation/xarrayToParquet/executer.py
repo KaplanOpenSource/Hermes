@@ -1,13 +1,13 @@
 from ....executers.abstractExecuter import abstractExecuter
 
 
-class xarrayToCSV(abstractExecuter):
+class xarrayToParquet(abstractExecuter):
     """
-    Converts an Xarray Dataset/DataArray to a CSV file.
+    Converts an Xarray Dataset/DataArray to a Parquet file.
 
     inputs:
         Xarray : str, path to an Xarray file or serialized lazy Xarray/Dask tree
-        OutputPath : str, path where the CSV file should be written
+        OutputPath : str, path where the Parquet file should be written
     """
 
     def _defaultParameters(self):
@@ -36,12 +36,13 @@ class xarrayToCSV(abstractExecuter):
 
     def run(self, **inputs):
         """
-        Converts an Xarray Dataset/DataArray to a CSV file.
+        Converts an Xarray Dataset/DataArray to a Parquet file.
 
         If the input is a serialized lazy Xarray/Dask tree, it is
-        materialized before being converted to CSV.
+        materialized before being converted to Parquet.
         """
         from pathlib import Path
+
 
         if 'Xarray' not in inputs:
             raise Exception(
@@ -63,8 +64,8 @@ class xarrayToCSV(abstractExecuter):
                 output_path = str(path.with_name(f"{path.stem}-*.{path.suffix}"))
         else:
             df = xarr.to_dataframe()
-        df.to_csv(output_path)
+        df.to_parquet(output_path)
 
         return dict(
-            csvPath=output_path
+            parquetPath=output_path
         )

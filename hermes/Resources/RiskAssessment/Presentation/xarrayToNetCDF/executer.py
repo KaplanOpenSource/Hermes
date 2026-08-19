@@ -1,13 +1,13 @@
 from ....executers.abstractExecuter import abstractExecuter
 
 
-class xarrayToCSV(abstractExecuter):
+class xarrayToNetCDF(abstractExecuter):
     """
-    Converts an Xarray Dataset/DataArray to a CSV file.
+    Converts an Xarray Dataset/DataArray to a NetCDF file.
 
     inputs:
         Xarray : str, path to an Xarray file or serialized lazy Xarray/Dask tree
-        OutputPath : str, path where the CSV file should be written
+        OutputPath : str, path where the NetCDF file should be written
     """
 
     def _defaultParameters(self):
@@ -36,13 +36,11 @@ class xarrayToCSV(abstractExecuter):
 
     def run(self, **inputs):
         """
-        Converts an Xarray Dataset/DataArray to a CSV file.
+        Converts an Xarray Dataset/DataArray to a NetCDF file.
 
         If the input is a serialized lazy Xarray/Dask tree, it is
-        materialized before being converted to CSV.
+        materialized before being converted to NetCDF.
         """
-        from pathlib import Path
-
         if 'Xarray' not in inputs:
             raise Exception(
                 "Node wasn't given an Xarray through the `Xarray` parameter"
@@ -54,17 +52,10 @@ class xarrayToCSV(abstractExecuter):
             )
         output_path = inputs['OutputPath']
 
-        xarr, is_lazy = self.load_xarray(inputs['Xarray'])
+        xarr, _ = self.load_xarray(inputs['Xarray'])
 
-        if is_lazy:
-            df = xarr.to_dask_dataframe()
-            path = Path(output_path)
-            if '*' not in path.name:
-                output_path = str(path.with_name(f"{path.stem}-*.{path.suffix}"))
-        else:
-            df = xarr.to_dataframe()
-        df.to_csv(output_path)
+        xarr.to_netcdf(output_path)
 
         return dict(
-            csvPath=output_path
+            netcdf_path=output_path
         )

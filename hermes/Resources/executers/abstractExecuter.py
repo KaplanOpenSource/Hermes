@@ -42,7 +42,11 @@ Example executers:
 
 """
 import abc
+import logging
 import os
+
+import joblib
+from geopandas import GeoDataFrame
 
 from hermes.hermesLogging.loggingObject import loggedObject
 
@@ -58,6 +62,7 @@ class abstractExecuter(loggedObject):
     """
 
     DASK_TREES_FOLDER = ".dask_trees"
+    GEOPANDAS_FOLDER = ".geopandas"
 
     parameters = None
 
@@ -217,16 +222,35 @@ class abstractExecuter(loggedObject):
         from hashlib import sha256
 
         import cloudpickle
+        from dask.tokenize import tokenize
         dask_tree_serialized = cloudpickle.dumps(dask_tree)
 
         # to avoid duplicate pickles we compute the hash and name the files based on the first chars of the hash
-        serialization_hash = sha256(dask_tree_serialized).hexdigest()[:32] 
+        try:
+            serialization_hash = tokenize(dask_tree, ensure_deterministic=True) # sha256(dask_tree_serialized).hexdigest()[:32] 
+        except tokenize.TokenizationError:
+            serialization_hash = tokenize(dask_tree)
+            logger = logging.getLoggerClass("luigi-interface")
+            logger.warning("The dask tree couldn't be deterministically tokenized! this means duplicate runs will take more disk space")
+
         trees_folder = pathlib.Path(project.filesDirectory) / abstractExecuter.DASK_TREES_FOLDER
         os.makedirs(trees_folder, exist_ok=True)
         serialized_tree_file_path = trees_folder/f"{serialization_hash}.pkl"
         with open(serialized_tree_file_path, "wb") as f:
             f.write(dask_tree_serialized)
         return serialized_tree_file_path
+
+    @staticmethod
+    def save_geopandas(project, saved_obj: GeoDataFrame, filename):
+        """Serializes the dask-task-tree with cloudpickle"""
+        import pathlib
+
+        # to avoid duplicate pickles we compute the hash and name the files based on the first chars of the hash
+        geopandas_folder = pathlib.Path(project.filesDirectory) / abstractExecuter.GEOPANDAS_FOLDER
+        os.makedirs(geopandas_folder, exist_ok=True)
+        serialized_geopandas_file_path = geopandas_folder/f"geopanda-{filename}.parquet"
+        saved_obj.to_parquet(serialized_geopandas_file_path)
+        return serialized_geopandas_file_path
 
 
     @staticmethod
