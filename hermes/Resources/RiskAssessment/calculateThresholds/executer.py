@@ -70,9 +70,7 @@ class calculateThresholds(abstractExecuter):
             raise Exception("Node wasn't given project name through `ProjectName` parameter")
         p = Project(projectName=inputs['ProjectName'])
 
-        if 'LSMConcentration' in inputs:
-            xarr, _ = self.load_xarray(inputs["LSMConcentration"])
-        else:
+        if 'LSMConcentration' not in inputs:
             raise Exception("Node wasn't given LSM simulation results path through `LSMConcentration` or `LSMDosage` parameter")
 
         if 'Agent' not in inputs:
@@ -88,9 +86,12 @@ class calculateThresholds(abstractExecuter):
 
         from hera.datalayer import autocache
         
-        _, doc = autocache.cacheFunction(calculator.calculateRegionOfInjured,
-                                         projectName=p.projectName, returnDoc=True)(xarr, "C")
-
+        @autocache.cacheFunction(projectName=p.projectName, returnDoc=True)
+        def load_and_calc_region_of_injured(xarr_path):
+            xarr, _ = self.load_xarray(xarr_path)
+            return calculator.calculateRegionOfInjured(xarr, "C")
+        _, doc = load_and_calc_region_of_injured(inputs["LSMConcentration"])
+        
         with open("temp.txt", "w") as f:
             f.write(f"writing to {doc.resource} hoping that it contains something like: {doc}")
 
