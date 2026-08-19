@@ -42,6 +42,7 @@ Example executers:
 
 """
 import abc
+import logging
 import os
 
 import joblib
@@ -221,10 +222,17 @@ class abstractExecuter(loggedObject):
         from hashlib import sha256
 
         import cloudpickle
+        from dask.tokenize import tokenize
         dask_tree_serialized = cloudpickle.dumps(dask_tree)
 
         # to avoid duplicate pickles we compute the hash and name the files based on the first chars of the hash
-        serialization_hash = sha256(dask_tree_serialized).hexdigest()[:32] 
+        try:
+            serialization_hash = tokenize(dask_tree, ensure_deterministic=True) # sha256(dask_tree_serialized).hexdigest()[:32] 
+        except tokenize.TokenizationError:
+            serialization_hash = tokenize(dask_tree)
+            logger = logging.getLoggerClass("luigi-interface")
+            logger.warning("The dask tree couldn't be deterministically tokenized! this means duplicate runs will take more disk space")
+
         trees_folder = pathlib.Path(project.filesDirectory) / abstractExecuter.DASK_TREES_FOLDER
         os.makedirs(trees_folder, exist_ok=True)
         serialized_tree_file_path = trees_folder/f"{serialization_hash}.pkl"
