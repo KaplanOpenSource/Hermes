@@ -77,5 +77,4 @@ class FilesWriter(abstractExecuter):
             createdFiles[groupName] = outputFiles
 
 
-        return dict(fileWriterTemplate="fileWriterTemplate",
-                    files=createdFiles)
+        return dict(files=createdFiles)

@@ -219,7 +219,6 @@ class abstractExecuter(loggedObject):
     def save_dask_tree(project, dask_tree):
         """Serializes the dask-task-tree with cloudpickle"""
         import pathlib
-        from hashlib import sha256
 
         import cloudpickle
         from dask.tokenize import tokenize

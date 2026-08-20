@@ -33,5 +33,4 @@ class CopyDirectory(abstractExecuter):
         absSource = os.path.abspath(inputs["Source"])
         absTarget = os.path.abspath(inputs["Target"])
 
-        return dict(copyDirectory="copyDirectory",
-                    Source =absSource,Target=absTarget)
+        return dict(Source =absSource,Target=absTarget)
