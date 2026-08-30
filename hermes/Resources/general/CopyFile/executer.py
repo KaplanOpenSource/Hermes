@@ -32,4 +32,4 @@ class CopyFile(abstractExecuter):
         absSource = os.path.abspath(inputs["Source"])
         absTarget = os.path.abspath(inputs["Target"])
 
-        return dict(copyField="copyFile",Source =absSource,Target=absTarget)
+        return dict(Source =absSource,Target=absTarget)
