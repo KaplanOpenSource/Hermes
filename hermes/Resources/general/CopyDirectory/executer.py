@@ -1,5 +1,6 @@
 import os
 import shutil
+from typing import Any
 
 from ...executers.abstractExecuter import abstractExecuter
 
@@ -16,7 +17,7 @@ class CopyDirectory(abstractExecuter):
         )
     
     @staticmethod
-    def testParamValues(params: dict[str, any]):
+    def testParamValues(params: dict[str, Any]):
         for param in ["Source", "Target"]:
             passed, status_message = abstractExecuter.checkParamType(params, param, str, required=True)
             if not passed:

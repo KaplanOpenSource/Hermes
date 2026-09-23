@@ -44,6 +44,7 @@ Example executers:
 import abc
 import logging
 import os
+from typing import Any
 
 import joblib
 from geopandas import GeoDataFrame
@@ -126,7 +127,7 @@ class abstractExecuter(loggedObject):
 
 
     @staticmethod
-    def isReference(s:any)->bool:
+    def isReference(s:Any)->bool:
         return isinstance(s,str) and s.startswith("{") and s.endswith('}')
 
     @staticmethod
