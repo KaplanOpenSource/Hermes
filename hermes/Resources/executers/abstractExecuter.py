@@ -213,6 +213,7 @@ class abstractExecuter(loggedObject):
         if abstractExecuter.isParamTestable(params, param_name):
             if params[param_name] not in availableValues:
                 return False, f"{param_name.title()} '{params[param_name]}' doesn't exists, choose one of: {', '.join(availableValues)}"
+        return True, ""
 
     @staticmethod
     def save_dask_tree(project, dask_tree):
