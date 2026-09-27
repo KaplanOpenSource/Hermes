@@ -44,6 +44,7 @@ Example executers:
 import abc
 import logging
 import os
+from typing import Any
 
 from geopandas import GeoDataFrame
 
@@ -129,7 +130,7 @@ class abstractExecuter(loggedObject):
         return isinstance(s,str) and s.startswith("{") and s.endswith('}')
 
     @staticmethod
-    def testParamValues(self, params):
+    def testParamValues(params: dict[str, Any]) -> tuple[bool, str]:
         """
             tests a set of parameter against node implementation.
 
