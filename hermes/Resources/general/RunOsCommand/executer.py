@@ -28,7 +28,7 @@ class RunOsCommand(abstractExecuter):
                 if not passed:
                     return passed, status_message
             elif params["Method"] == "Command list":
-                passed, status_message = abstractExecuter.checkParamType(params, "Command", dict, True)
+                passed, status_message = abstractExecuter.checkParamType(params, "Command", (dict, list), True)
                 if not passed:
                     return passed, status_message
         

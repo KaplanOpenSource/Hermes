@@ -46,7 +46,6 @@ import logging
 import os
 from typing import Any
 
-import joblib
 from geopandas import GeoDataFrame
 
 from hermes.hermesLogging.loggingObject import loggedObject
@@ -131,7 +130,7 @@ class abstractExecuter(loggedObject):
         return isinstance(s,str) and s.startswith("{") and s.endswith('}')
 
     @staticmethod
-    def testParamValues(self, params):
+    def testParamValues(params: dict[str, Any]) -> tuple[bool, str]:
         """
             tests a set of parameter against node implementation.
 
@@ -203,10 +202,16 @@ class abstractExecuter(loggedObject):
         return param_name in params and not abstractExecuter.isReference(params[param_name])
     
     @staticmethod
-    def checkParamType(params, param_name, type, required=False):
+    def checkParamType(params: dict[str, Any], param_name: str, type: type | tuple[type, ...], required: bool = False) -> tuple[bool, str]:
         if param_name not in params.keys():
-            return (False, f"{param_name} is missing") if required else (True, "")
-        return (True, "") if (abstractExecuter.isReference(params[param_name]) or isinstance(params[param_name], type)) else (False, f"{param_name} must be type({type})")
+            if required:
+                return False, f"{param_name} is missing"
+            return True, ""
+        if abstractExecuter.isReference(params[param_name]):
+            return True, ""
+        if not isinstance(params[param_name], type):
+            return False, f"{param_name} must be type({type})"
+        return True, ""
     
     @staticmethod
     def checkParamAgainstList(params, param_name, availableValues, required=False):
@@ -215,6 +220,7 @@ class abstractExecuter(loggedObject):
         if abstractExecuter.isParamTestable(params, param_name):
             if params[param_name] not in availableValues:
                 return False, f"{param_name.title()} '{params[param_name]}' doesn't exists, choose one of: {', '.join(availableValues)}"
+        return True, ""
 
     @staticmethod
     def save_dask_tree(project, dask_tree):
