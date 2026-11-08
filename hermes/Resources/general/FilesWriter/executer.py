@@ -4,6 +4,17 @@ from ...executers.abstractExecuter import abstractExecuter
 
 
 class FilesWriter(abstractExecuter):
+    """
+    Creates one or more files on disk with specified content.
+
+    Usage:
+        Define the 'casePath' where files should be created and provide a dictionary of 'Files'.
+        Each entry in 'Files' should specify a filename and its content. This node can create single files or entire directories of files if the content is provided as a map.
+
+    Example:
+        Creating a set of small configuration scripts or README files needed for a simulation run directly from within the workflow.
+    """
+
 
     def __init__(self, tskJSON):
         pass
@@ -77,5 +88,4 @@ class FilesWriter(abstractExecuter):
             createdFiles[groupName] = outputFiles
 
 
-        return dict(fileWriterTemplate="fileWriterTemplate",
-                    files=createdFiles)
+        return dict(files=createdFiles)

@@ -3,15 +3,23 @@ from ...executers.abstractExecuter import abstractExecuter
 
 class setAgentQuantity(abstractExecuter):
     """
-        Set the quantity released in an LSM simulation
+    Adjusts the amount of agent released in an existing simulation result without needing to re-run the entire simulation.
 
-        inputs:
-            ProjectName : str, name of the project to use
-            LSMDosage : str, path to file containing the dosage used in policy protection calculation
-            LSMConcentration : str, path to file containing the concentration used in policy protection calculation
-            Quantity : str, Quantity of agent released and must specify units(500*kg)
-            MassUnits : str, the units to use in the xarray for mass(default is milligrams)
-            TimeUnits : str, the units to use in the xarray for time(default is minutes)
+    Usage:
+        Provide 'ProjectName' and either 'LSMDosage' or 'LSMConcentration'.
+        Crucially, specify the new 'Quantity' (including units, e.g., '500*kg'). You can also set 'MassUnits' and 'TimeUnits' for the output.
+
+    Example:
+        If a simulation was run with a default release quantity but you want to see the impact of doubling that amount,
+        you can use this node to scale the existing results linearly.
+    
+    Inputs:
+        ProjectName : str, name of the project to use
+        LSMDosage : str, path to file containing the dosage used in policy protection calculation
+        LSMConcentration : str, path to file containing the concentration used in policy protection calculation
+        Quantity : str, Quantity of agent released and must specify units(500*kg)
+        MassUnits : str, the units to use in the xarray for mass(default is milligrams)
+        TimeUnits : str, the units to use in the xarray for time(default is minutes)
     """
 
     def _defaultParameters(self):
@@ -25,7 +33,7 @@ class setAgentQuantity(abstractExecuter):
 
     @staticmethod
     def testParamValues(params: dict[str, any]):        
-        if ("LSMDosage" in params) ^ ("LSMConcentration" in params):
+        if not (("LSMDosage" in params) ^ ("LSMConcentration" in params)):
             return False, "Setting simulation's Quantity requires LSM simulation results path exclusively through `LSMConcentration` or `LSMDosage` parameter"
 
         for param in ["LSMDosage", "LSMConcentration"]:
@@ -117,4 +125,4 @@ class setAgentQuantity(abstractExecuter):
             xarr['C'] = conc_factor*xarr['C']
 
 
-        return dict(setAgentQuantity="setAgentQuantity",xarray=str(self.save_dask_tree(project=p, dask_tree=xarr)))
+        return dict(xarray=str(self.save_dask_tree(project=p, dask_tree=xarr)))

@@ -6,6 +6,19 @@ from hermes.Resources.executers.abstractExecuter import abstractExecuter
 
 
 class BuildAllrun(abstractExecuter):
+    """
+    Generates 'Allrun' and 'Allclean' shell scripts in the OpenFOAM case directory to automate simulation setup and execution.
+
+    Usage:
+        Provide the 'casePath' and a list of tools to run in 'runFile'. You can also specify if the overall case
+        should be executed in parallel ('parallelCase') and how individual tools should behave (e.g., whether they
+        should wait for completion or log output to screen).
+
+    Example:
+        Automating a full OpenFOAM pipeline that runs blockMesh, snappyHexMesh, and then starts the solver,
+        allowing you to execute the entire sequence with a single command in the terminal.
+    """
+
 
     def _defaultParameters(self):
         return dict(
@@ -20,7 +33,7 @@ class BuildAllrun(abstractExecuter):
         self.buildCaseExecutionScript(caseDirectory=path,
                                       execConfiguration=inputs)
 
-        return dict(buildAllRun="buildAllrun")
+        return dict()
 
 
     def buildCaseExecutionScript(self,caseDirectory,execConfiguration):

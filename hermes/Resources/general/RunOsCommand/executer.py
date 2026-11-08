@@ -5,6 +5,17 @@ from ...executers.abstractExecuter import abstractExecuter
 
 
 class RunOsCommand(abstractExecuter):
+    """
+    Runs operating system commands or batch files on the host machine.
+
+    Usage:
+        Choose a 'Method': either 'batchFile' to execute an existing script file, or 'Command list' to run a series of shell commands.
+        You can also specify 'changeDirTo' to change the working directory before executing the commands.
+
+    Example:
+        Running a custom bash script that cleans up temporary simulation files after a run is complete.
+    """
+
 
     def _defaultParameters(self):
         return dict(
@@ -40,6 +51,7 @@ class RunOsCommand(abstractExecuter):
         return True, ""
 
     def run(self, **inputs):
+        import subprocess
         cwd = os.getcwd()
         if "changeDirTo" in inputs:
             os.chdir(os.path.abspath(inputs["changeDirTo"]))
@@ -60,12 +72,30 @@ class RunOsCommand(abstractExecuter):
         elif inputs["Method"]=="Command list":
             import numpy
             ret = []
-            for cmd in numpy.atleast_1d(inputs["Command"]):
-                ret_val = os.system(cmd)
-                if ret_val != 0:
-                    ErrorMsg = f"{cmd} failed"
-                else:
-                    ret.append("Success")
+            chained_cmd = " && ".join(numpy.atleast_1d(inputs["Command"]))
+
+            p = subprocess.Popen(
+                chained_cmd, shell=True, 
+                executable='/bin/bash',
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1  # Line-buffered so it streams immediately
+                )
+            
+            captured_output = []
+            # Iterate over the output line-by-line as it's generated
+            for line in p.stdout:
+                print(f"[RunOsCommand]\t{line}", end="") 
+                
+                captured_output.append(line)
+
+            p.wait()
+
+            if p.returncode != 0:
+                ErrorMsg = "Command sequence failed"
+            else:
+                ret.append("Success")
 
                 #### This solution to save the std out doesn't work when there are multiple parameters.
                 # output = subprocess.Popen(cmd.split(" "),stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
@@ -85,5 +115,5 @@ class RunOsCommand(abstractExecuter):
         if ErrorMsg is not None:
             raise ValueError(ErrorMsg)
 
-        return dict(RunOsCommand="RunOsCommand",commands=ret)
+        return dict(commands=ret)
 

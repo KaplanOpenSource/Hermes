@@ -3,9 +3,15 @@ from ....executers.abstractExecuter import abstractExecuter
 
 class xarrayToCSV(abstractExecuter):
     """
-    Converts an Xarray Dataset/DataArray to a CSV file.
+    Exports simulation data (Xarray format) to a CSV file for use in spreadsheets or other tools.
 
-    inputs:
+    Usage:
+        Provide the 'Xarray' data source and the 'OutputPath' where the resulting CSV file should be saved.
+
+    Example:
+        Exporting calculated risk indices for specific stations into a CSV file to create a summary table in Excel.
+
+    Inputs:
         Xarray : str, path to an Xarray file or serialized lazy Xarray/Dask tree
         OutputPath : str, path where the CSV file should be written
     """

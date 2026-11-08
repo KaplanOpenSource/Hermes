@@ -1,8 +1,20 @@
-from ....executers.abstractExecuter import abstractExecuter
 import logging
 import os
 
+from ....executers.abstractExecuter import abstractExecuter
+
+
 class MakeFlowDispersion(abstractExecuter):
+    """
+    Prepares a steady-state flow field in OpenFOAM specifically for subsequent dispersion simulations.
+
+    Usage:
+        Provide the simulation name and flow data parameters. You can also enable 'buildDistanceFromWalls' to pre-calculate distance maps from boundaries, which is often required for certain dispersion models.
+
+    Example:
+        Generating a base wind flow around a building complex so that later you can simulate how a plume of gas would move through that established airflow without re-calculating the wind field every time.
+    """
+
 
 
     def run(self, **inputs):
@@ -37,4 +49,4 @@ class MakeFlowDispersion(abstractExecuter):
 
 
 
-        return dict(MakeFlowDispersion="MakeFlowDispersion",flowField=case)
+        return dict(flowField=case)
