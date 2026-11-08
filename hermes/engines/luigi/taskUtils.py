@@ -6,7 +6,7 @@ import jsonpath_rw_ext as jp
 
 import hermes
 
-from ...utils.logging import get_classMethod_logger
+from ...utils.logging import get_classMethodLogger
 
 
 class utils:
@@ -46,9 +46,8 @@ class utils:
         <parameter name> :  [Exp path],
                                         <node name>.[Node path].
 
-
-                    [Exp path]  = <workflow|input|output|value|parameters|input_parameters|WebGUI|Properties|WebGui|>.[Exp path]
-                    [Node Path] = <node name>.[Exp path|node path]
+        [Exp path]  = <workflow|input|output|value|parameters|input_parameters|WebGUI|Properties|WebGuu|>.[Exp path]
+        [Node Path] = <node name>.[Exp path|node path]
 
         If the path is empty return {}
 
@@ -60,12 +59,12 @@ class utils:
         :return:
             The value of the parameter, str
         """
-        logger = get_classMethod_logger(self,"_evaluate_path")
+        logger = get_classMethodLogger(self,"_evaluate_path")
         logger.debug(f"Processing {parampath} with params {params}")
         if len(parampath) == 0:
             return '{}'
         path_tokens = parampath.split(".")
-        func_name = path_tokens[0] if path_tokens[0] in ["WebGUI","parameters","workflow","input_parameters","output","Properties","WebGui","value"] else "node"
+        func_name = path_tokens[0] if path_tokens[0] in ["WebGUI","parameters","workflow","input_parameters","output","Properties","WebGui","value","Execution"] else "node"
         func = getattr(self, "_handle_%s" % func_name)
         if len(path_tokens[1:]) == 0:
             logger.critical(f"_evaluate_path: Some error with path: <{parampath}>. Assuming its C++ code.")
@@ -98,12 +97,18 @@ class utils:
         return retval if len(retval) > 1 else retval[0]
 
     def _handle_input_parameters(self, parameterPath, params):
-        params = params.get(parameterPath[0], {})
+        execution = params.get("Execution", {})
+        ipars = execution.get("input_parameters", {})
         parameterPath = ".".join(parameterPath[1:])
-        retval = jp.match(parameterPath, params)
+        retval = jp.match(parameterPath, ipars)
         return retval if len(retval) > 1 else retval[0]
 
-
+    def _handle_Execution(self, parameterPath, params):
+        # 'Execution' is a context marker inside a task JSON
+        # (e.g. <node>.Execution.input_parameters.<param>); skip it and let
+        # the next segment be resolved as the actual context (e.g. input_parameters).
+        parameterPath = ".".join(parameterPath[1:])
+        return self._evaluate_path(parameterPath, params)
 
     def _handle_output(self,parameterPath, params):
         # if len(parameterPath) == 1:
@@ -158,9 +163,9 @@ class utils:
         -----
         The method tokenizes the path, handles special tokens via `_handle_token_*` methods, and resolves path segments against the provided `params` dictionary. It supports nested structures and returns a string or the original value depending on the content.
         """
-        logger = get_classMethod_logger(self,"_parseAndEvaluatePath")  # Logger for debugging
+        logger = get_classMethodLogger(self,"_parseAndEvaluatePath")  # Logger for debugging
         value = []  # Accumulate resolved tokens
-        if paramPath.startswith("#{"):
+        if paramPath.strip().startswith("#{"):
             # Directly return literal string starting with '#{'
             ret = paramPath
         else:
@@ -240,8 +245,6 @@ class utils:
 
                             newValueList.append(newValue)
                         param_ret[dict_paramname] =newValueList
-                    else:
-                        param_ret[dict_paramname] = dict_parampath
 
                 ret[paramname] = param_ret
 
@@ -258,6 +261,3 @@ class utils:
                 ret[paramname] = parampath
 
         return ret
-
-
-
