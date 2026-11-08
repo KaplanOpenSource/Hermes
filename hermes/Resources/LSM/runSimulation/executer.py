@@ -3,17 +3,26 @@ from ...executers.abstractExecuter import abstractExecuter
 
 class runSimulation(abstractExecuter):
     """
-        Runs a Fortran LSM simulation.
+    Runs a Fortran-based Lagrangian Stochastic Model (LSM) simulation.
 
-        inputs:
-            ProjectName : str, The hera project name to run the simulation under
-            Template : str, The name of the template to use
-            SimulationParameters : dict, Simulation parameters to apply on the template
-            SimulationName : str, The name of the simulation
-            topography : str, Path to topography file if needed
-            stations : str, Path to stations data if needed
-            canopy  : str, The name of the function to run
-            depositionRates : int, depositionRate(default is 0 meaning no deposition) 
+    Usage:
+        Provide the 'ProjectName' and 'SimulationName'. You can specify a 'Template' to use as a base,
+        and override its settings using 'SimulationParameters'. Additional files like 'topography',
+        'stations', or 'canopy' data can also be provided.
+
+    Example:
+        Simulating the dispersion of a pollutant in a specific city area by providing local topography
+        and wind conditions via simulation parameters.
+
+    Inputs:
+        ProjectName : str, The hera project name to run the simulation under
+        Template : str, The name of the template to use
+        SimulationParameters : dict, Simulation parameters to apply on the template
+        SimulationName : str, The name of the simulation
+        topography : str, Path to topography file if needed
+        stations : str, Path to stations data if needed
+        canopy  : str, The name of the function to run
+        depositionRates : int, depositionRate(default is 0 meaning no deposition) 
     """
 
     def _defaultParameters(self):

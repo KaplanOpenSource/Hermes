@@ -5,6 +5,16 @@ from ...executers.abstractExecuter import abstractExecuter
 
 
 class CopyDirectory(abstractExecuter):
+    """
+    Copies an entire folder (and all its contents) from one location to another.
+
+    Usage:
+        Provide the 'Source' path of the folder you wish to copy and the 'Target' path where the copies should be placed.
+
+    Example:
+        Backing up a set of simulation input files into a separate archival directory before starting a new run.
+    """
+
 
     def _defaultParameters(self):
         return dict(

@@ -8,6 +8,18 @@ from ...executers.abstractExecuter import abstractExecuter
 
 
 class JinjaTransform(abstractExecuter):
+    """
+    Generates text files (like OpenFOAM dictionaries) by filling in a template with specific values.
+
+    Usage:
+        This node is typically used as an internal helper. It takes a template file and a set of parameters,
+        replacing placeholders in the template with actual values to produce a final configuration file.
+
+    Example:
+        Creating a customized 'controlDict' for OpenFOAM where simulation time-steps and output intervals are
+        dynamically calculated based on previous workflow steps.
+    """
+
 
     def _defaultParameters(self):
         return dict(

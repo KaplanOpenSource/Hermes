@@ -3,9 +3,15 @@ from ....executers.abstractExecuter import abstractExecuter
 
 class xarrayToParquet(abstractExecuter):
     """
-    Converts an Xarray Dataset/DataArray to a Parquet file.
+    Exports simulation data (Xarray format) to a Parquet file, which is highly efficient for large datasets and fast querying.
 
-    inputs:
+    Usage:
+        Provide the 'Xarray' data source and the 'OutputPath' where the resulting Parquet file should be saved.
+
+    Example:
+        Saving huge amounts of dispersion data in Parquet format so that they can be queried quickly by a separate big-data analysis pipeline.
+
+    Inputs:
         Xarray : str, path to an Xarray file or serialized lazy Xarray/Dask tree
         OutputPath : str, path where the Parquet file should be written
     """

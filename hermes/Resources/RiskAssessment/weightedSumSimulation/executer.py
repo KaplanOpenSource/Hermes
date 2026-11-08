@@ -3,12 +3,22 @@ from ...executers.abstractExecuter import abstractExecuter
 
 class weightedSumSimulation(abstractExecuter):
     """
-        Set the quantity released in an LSM simulation
+    Computes a weighted sum of multiple LSM simulation results (either Concentration or Dosage).
 
-        inputs:
-            ProjectName : str, name of the project to use
-            LSMConcentrations : list[str], list of concentration xarrays
-            Weights : list[int], list of weights
+    Usage:
+        Provide 'ProjectName' and a list of simulation result paths ('LSMConcentrations' or 'LSMDosages').
+        You must also provide a corresponding list of 'Weights' (numerical values) to apply to each simulation.
+
+    Example:
+        * Sum of ground accumulated concentration from simulations with different release heights.
+        * Combining results from several simulations with different wind directions, each weighted by the probability
+          of that wind direction occurring, to create an average risk map.
+
+    Inputs:
+        ProjectName : str, name of the project to use
+        LSMConcentrations : list[str], list of concentration xarrays
+        LSMDosages : list[str], list of dosages xarrays
+        Weights : list[int], list of weights
     """
 
     def _defaultParameters(self):
@@ -33,7 +43,7 @@ class weightedSumSimulation(abstractExecuter):
                 return passed, status_message
             
 
-        if ("LSMDosages" in params) ^ ("LSMConcentrations" in params): # xor of both params
+        if not(("LSMDosages" in params) ^ ("LSMConcentrations" in params)):
             return False, "weighted sum requires LSM simulation result paths exclusively through `LSMConcentrations` or `LSMDosages` parameter"
         
         passed, status_message = abstractExecuter.checkParamType(params, "LSMConcentrations", list, required=False)
@@ -77,7 +87,7 @@ class weightedSumSimulation(abstractExecuter):
             raise Exception("Node wasn't given project name through `ProjectName` parameter")
         p = Project(projectName=inputs['ProjectName'])
 
-        if ("LSMDosages" in inputs) ^ ("LSMConcentrations" in inputs): # xor of both params
+        if not (("LSMDosages" in inputs) ^ ("LSMConcentrations" in inputs)):
             return Exception("weighted sum requires LSM simulation result paths exclusively through `LSMConcentrations` or `LSMDosages` parameter")
         if 'LSMDosages' in inputs:
             xarrs, _ = self.load_xarray(inputs["LSMDosages"])

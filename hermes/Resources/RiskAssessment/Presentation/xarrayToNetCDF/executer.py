@@ -3,9 +3,15 @@ from ....executers.abstractExecuter import abstractExecuter
 
 class xarrayToNetCDF(abstractExecuter):
     """
-    Converts an Xarray Dataset/DataArray to a NetCDF file.
+    Exports simulation data (Xarray format) to a NetCDF file, which is a standard for scientific multi-dimensional data.
 
-    inputs:
+    Usage:
+        Provide the 'Xarray' data source and the 'OutputPath' where the resulting NetCDF file should be saved.
+
+    Example:
+        Saving final risk assessment results in NetCDF format to be used later in professional GIS software or visualization tools like Panoply.
+
+    Inputs:
         Xarray : str, path to an Xarray file or serialized lazy Xarray/Dask tree
         OutputPath : str, path where the NetCDF file should be written
     """

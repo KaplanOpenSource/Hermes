@@ -3,13 +3,21 @@ from ...executers.abstractExecuter import abstractExecuter
 
 class calculateThresholds(abstractExecuter):
     """
-        Set the quantity released in an LSM simulation
+    Calculates the risk thresholds (the 'region of injured') for a specific agent based on simulation concentrations.
 
-        inputs:
-            ProjectName : str, name of the project to use
-            LSMConcentration : str, path to file containing the concentrations used to calculate thesholds
-            Agent : str, name of the agent released
-            Calculator : str, name of the threshold calculator to use, defined per agent
+    Usage:
+        Specify the 'ProjectName', the path to the LSM concentration data ('LSMConcentration'),
+        the 'Agent' involved, and the 'Calculator' method to use for that agent.
+
+    Example:
+        Determining the area where concentrations of a specific chemical exceed safety thresholds
+        based on toxicological data associated with that agent.
+
+    Inputs:
+        ProjectName : str, name of the project to use
+        LSMConcentration : str, path to file containing the concentrations used to calculate thesholds
+        Agent : str, name of the agent released
+        Calculator : str, name of the threshold calculator to use, defined per agent
     """
 
     def _defaultParameters(self):

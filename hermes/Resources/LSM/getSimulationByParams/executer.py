@@ -3,13 +3,20 @@ from ...executers.abstractExecuter import abstractExecuter
 
 class getSimulationByParams(abstractExecuter):
     """
-        Runs a Fortran LSM simulation.
+    Retrieves an existing LSM simulation based on provided parameters instead of running a new one.
 
-        inputs:
-            ProjectName : str, The class path string to the class
-            Template : str, The class path string to the class
-            SimulationParameters : str, The class path string to the class
-            SimulationName : str, The class path string to the class
+    Usage:
+        Provide the 'ProjectName' and 'SimulationName'. You can also provide 'Template' and 'SimulationParameters'
+        to narrow down the search for an existing simulation that matches these criteria.
+
+    Example:
+        Reusing results from a previously run high-resolution simulation to avoid expensive re-computation when only post-processing is needed.
+
+    Inputs:
+        ProjectName : str, The class path string to the class
+        Template : str, The class path string to the class
+        SimulationParameters : str, The class path string to the class
+        SimulationName : str, The class path string to the class
     """
 
     def _defaultParameters(self):

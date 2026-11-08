@@ -3,9 +3,15 @@ from ....executers.abstractExecuter import abstractExecuter
 
 class xarrayToZarr(abstractExecuter):
     """
-    Converts an Xarray Dataset/DataArray to a zarr file.
+    Exports simulation data (Xarray format) to a Zarr store, which is optimized for chunked, compressed, binary storage of large arrays.
 
-    inputs:
+    Usage:
+        Provide the 'Xarray' data source and the 'OutputPath' where the resulting Zarr store should be saved.
+
+    Example:
+        Saving high-dimensional simulation results in Zarr format to allow fast parallel access by multiple worker nodes in a distributed cloud environment.
+
+    Inputs:
         Xarray : str, path to an Xarray file or serialized lazy Xarray/Dask tree
         OutputPath : str, path where the zarr file should be written
     """

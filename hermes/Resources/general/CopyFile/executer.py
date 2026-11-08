@@ -5,6 +5,16 @@ from ...executers.abstractExecuter import abstractExecuter
 
 
 class CopyFile(abstractExecuter):
+    """
+    Copies a single file from one location to another.
+
+    Usage:
+        Provide the 'Source' path (the file you want to copy) and the 'Target' path (where you want the copy to be placed).
+
+    Example:
+        Copying a configuration template file from a project folder to the current simulation directory for customization.
+    """
+
 
     def _defaultParameters(self):
         return dict(

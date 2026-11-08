@@ -7,12 +7,21 @@ from ...executers.abstractExecuter import abstractExecuter
 
 class RunPythonCode(abstractExecuter):
     """
-        Executes the function in the class.
+    Runs a custom Python function defined in an external module.
 
-        inputs:
-            classpath : str, The class path string to the class
-            funcName  : str, The name of the function to run .
-            parameters : dict, The parameters for the function.
+    Usage:
+        Specify the 'CodeDirectory' (where your script is located), the 'ModulePath',
+        the 'ClassName', and the 'MethodName' of the function you wish to execute.
+        You can also pass a dictionary of 'Parameters' as arguments to the function.
+
+    Example:
+        Executing a custom data analysis script that calculates specific metrics from simulation results
+        that aren't provided by standard tools.
+
+    Inputs:
+        classpath : str, The class path string to the class
+        funcName  : str, The name of the function to run .
+        parameters : dict, The parameters for the function.
     """
 
     def _defaultParameters(self):

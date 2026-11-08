@@ -3,13 +3,21 @@ from ...executers.abstractExecuter import abstractExecuter
 
 class runProtectionPolicy(abstractExecuter):
     """
-        Runs a Fortran LSM simulation.
+    Evaluates the effectiveness of protection policies (e.g., sheltering in place or evacuation) on LSM concentration data.
 
-        inputs:
-            ProjectName : str, The class path string to the class
-            LSMDosage : str, path to file containing the dosage used in policy protection calculation
-            LSMConcentration : str, path to file containing the concentration used in policy protection calculation
-            policy : dict, dictionary of the policies to be applied
+    Usage:
+        Provide the 'ProjectName', and either the 'LSMDosage' or 'LSMConcentration' data.
+        Define a 'policy' dictionary containing the protection actions to be applied, in order of execution.
+
+    Example:
+        Assessing how a policy of 'Close Windows' followed by 'Evacuation after 30 minutes' reduces the overall exposure
+        of a population during a chemical release event.
+
+    inputs:
+        ProjectName : str, The class path string to the class
+        LSMDosage : str, path to file containing the dosage used in policy protection calculation
+        LSMConcentration : str, path to file containing the concentration used in policy protection calculation
+        policy : dict, dictionary of the policies to be applied
     """
 
     def _defaultParameters(self):

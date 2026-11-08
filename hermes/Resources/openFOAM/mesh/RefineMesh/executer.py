@@ -2,6 +2,16 @@ from ....general import JinjaTransform
 
 
 class RefineMesh(JinjaTransform):
+    """
+    Configures the process of locally refining the mesh density in specific regions of interest to improve simulation accuracy.
+
+    Usage:
+        Specify the areas (e.g., near a source or an obstacle) where you need a finer grid and the level of refinement required.
+
+    Example:
+        Increasing the mesh resolution specifically around a chemical release point to accurately capture high concentration gradients.
+    """
+
 
     def _defaultParameters(self):
         return dict(
