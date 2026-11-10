@@ -5,8 +5,7 @@ from collections.abc import Iterable
 import jsonpath_rw_ext as jp
 
 import hermes
-
-from ...utils.logging import get_classMethodLogger
+from hermes.utils.logging import get_classMethod_logger
 
 
 class utils:
@@ -59,7 +58,7 @@ class utils:
         :return:
             The value of the parameter, str
         """
-        logger = get_classMethodLogger(self,"_evaluate_path")
+        logger = get_classMethod_logger(self,"_evaluate_path")
         logger.debug(f"Processing {parampath} with params {params}")
         if len(parampath) == 0:
             return '{}'
@@ -163,7 +162,7 @@ class utils:
         -----
         The method tokenizes the path, handles special tokens via `_handle_token_*` methods, and resolves path segments against the provided `params` dictionary. It supports nested structures and returns a string or the original value depending on the content.
         """
-        logger = get_classMethodLogger(self,"_parseAndEvaluatePath")  # Logger for debugging
+        logger = get_classMethod_logger(self,"_parseAndEvaluatePath")  # Logger for debugging
         value = []  # Accumulate resolved tokens
         if paramPath.strip().startswith("#{"):
             # Directly return literal string starting with '#{'
