@@ -230,9 +230,9 @@ class utils:
                 for dict_paramname, dict_parampath in parampath.items():
                     if isinstance(dict_parampath,dict):
                         param_ret[dict_paramname] = self.build_executer_parameters({dict_paramname:dict_parampath}, params)[dict_paramname]
-                    elif isinstance(dict_parampath,str):
+                    elif isinstance(dict_parampath, str):
                         param_ret[dict_paramname] = self._parseAndEvaluatePath(dict_parampath, params)
-                    elif isinstance(dict_parampath,list):
+                    elif isinstance(dict_parampath, list):
                         newValueList = []
                         for value in dict_parampath:
                             if isinstance(value, str):
@@ -240,10 +240,14 @@ class utils:
                             elif isinstance(value, dict):  # or isinstance(value,list): leads to a bug.
                                 newValue = self.build_executer_parameters(value, params)
                             else:
+                                # Preserve primitive types like bool, int, float directly
                                 newValue = value
 
                             newValueList.append(newValue)
-                        param_ret[dict_paramname] =newValueList
+                        param_ret[dict_paramname] = newValueList
+                    else:
+                        # Preserve primitive types (bool, int, float, etc.) directly
+                        param_ret[dict_paramname] = dict_parampath
 
                 ret[paramname] = param_ret
 
