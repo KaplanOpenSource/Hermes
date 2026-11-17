@@ -1,0 +1,110 @@
+{
+  "snappyHexMeshDict": {
+    "Execution": {
+      "input_parameters": {
+        "addLayers": true,
+        "addLayersControls": {
+          "expansionRatio": 1.0,
+          "featureAngle": 60,
+          "finalLayerThickness": 0.3,
+          "layers": {},
+          "maxFaceThicknessRatio": 0.5,
+          "maxThicknessToMedialRatio": 0.3,
+          "minMedianAxisAngle": 90,
+          "minThickness": 0.1,
+          "nBufferCellsNoExtrude": 0,
+          "nGrow": 0,
+          "nLayerIter": 50,
+          "nRelaxIter": 3,
+          "nSmoothNormals": 3,
+          "nSmoothSurfaceNormals": 1,
+          "nSmoothThickness": 10,
+          "relativeSizes": true,
+          "slipFeatureAngle": 30
+        },
+        "castellatedMesh": true,
+        "castellatedMeshControls": {
+          "allowFreeStandingZoneFaces": true,
+          "features": [
+            {
+              "file": "\"motorBike.eMesh\"",
+              "level": 6
+            }
+          ],
+          "insidePoint": [
+            3.0001,
+            3.0001,
+            0.43
+          ],
+          "maxGlobalCells": 2000000,
+          "maxLoadUnbalance": 0.1,
+          "maxLocalCells": 100000,
+          "minRefinementCells": 10,
+          "nCellsBetweenLevels": 3,
+          "refinementRegions": {
+            "refinementBox": {
+              "level": 4,
+              "mode": "inside"
+            }
+          },
+          "refinementSurfaces": {
+            "motorBike": {
+              "level": [
+                5,
+                6
+              ],
+              "patchInfo": {
+                "inGroups": [
+                  "motorBikeGroup"
+                ],
+                "type": "wall"
+              }
+            }
+          },
+          "resolveFeatureAngle": 30
+        },
+        "geometry": {
+          "motorBike": {
+            "file": "\"motorBike.obj\"",
+            "type": "triSurfaceMesh"
+          },
+          "refinementBox": {
+            "max": [
+              8.0,
+              0.7,
+              2.5
+            ],
+            "min": [
+              -1.0,
+              -0.7,
+              0.0
+            ],
+            "type": "searchableBox"
+          }
+        },
+        "mergeTolerance": 1e-06,
+        "meshQualityControls": {
+          "0": "#include \"meshQualityDict\""
+        },
+        "snap": true,
+        "snapControls": {
+          "explicitFeatureSnap": true,
+          "implicitFeatureSnap": false,
+          "multiRegionFeatureSnap": false,
+          "nFeatureSnapIter": 10,
+          "nRelaxIter": 5,
+          "nSmoothPatch": 3,
+          "nSolveIter": 30,
+          "tolerance": 2.0
+        },
+        "writeFlags": [
+          "scalarLevels",
+          "layerSets",
+          "layerFields"
+        ]
+      }
+    },
+    "type": "openFOAM.mesh.SnappyHexMesh",
+    "version": 2
+  }
+}

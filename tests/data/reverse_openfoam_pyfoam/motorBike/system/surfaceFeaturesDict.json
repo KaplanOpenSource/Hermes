@@ -1,0 +1,18 @@
+{
+  "surfaceFeaturesDict": {
+    "Execution": {
+      "input_parameters": {
+        "includedAngle": 150,
+        "subsetFeatures": {
+          "nonManifoldEdges": false,
+          "openEdges": true
+        },
+        "surfaces": [
+          "\"motorBike.obj\""
+        ]
+      }
+    },
+    "type": "openFOAM.system.SurfaceFeatures",
+    "version": 2
+  }
+}

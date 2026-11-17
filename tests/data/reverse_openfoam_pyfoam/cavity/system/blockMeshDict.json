@@ -1,0 +1,133 @@
+{
+  "blockMeshDict": {
+    "Execution": {
+      "input_parameters": {
+        "blocks": [
+          "hex",
+          [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          [
+            20,
+            20,
+            1
+          ],
+          "simpleGrading",
+          [
+            1,
+            1,
+            1
+          ]
+        ],
+        "boundary": [
+          {
+            "faces": [
+              [
+                3,
+                7,
+                6,
+                2
+              ]
+            ],
+            "name": "movingWall",
+            "type": "wall"
+          },
+          {
+            "faces": [
+              [
+                0,
+                4,
+                7,
+                3
+              ],
+              [
+                2,
+                6,
+                5,
+                1
+              ],
+              [
+                1,
+                5,
+                4,
+                0
+              ]
+            ],
+            "name": "fixedWalls",
+            "type": "wall"
+          },
+          {
+            "faces": [
+              [
+                0,
+                3,
+                2,
+                1
+              ],
+              [
+                4,
+                5,
+                6,
+                7
+              ]
+            ],
+            "name": "frontAndBack",
+            "type": "empty"
+          }
+        ],
+        "convertToMeters": 0.1,
+        "vertices": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            1,
+            1,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0.1
+          ],
+          [
+            1,
+            0,
+            0.1
+          ],
+          [
+            1,
+            1,
+            0.1
+          ],
+          [
+            0,
+            1,
+            0.1
+          ]
+        ]
+      }
+    },
+    "type": "openFOAM.mesh.BlockMesh",
+    "version": 2
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "controlDict": {
+    "Execution": {
+      "input_parameters": {
+        "values": {
+          "application": "icoFoam",
+          "deltaT": 0.005,
+          "endTime": 0.5,
+          "purgeWrite": 0,
+          "runTimeModifiable": true,
+          "startFrom": "startTime",
+          "startTime": 0,
+          "stopAt": "endTime",
+          "timeFormat": "general",
+          "timePrecision": 6,
+          "writeCompression": false,
+          "writeControl": "timeStep",
+          "writeFormat": "ascii",
+          "writeInterval": 20,
+          "writePrecision": 6
+        }
+      }
+    },
+    "type": "openFOAM.system.ControlDict",
+    "version": 2
+  }
+}

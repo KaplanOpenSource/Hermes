@@ -1,0 +1,43 @@
+{
+  "fvSchemes": {
+    "Execution": {
+      "input_parameters": {
+        "ddtSchemes": {
+          "default": "Euler"
+        },
+        "divSchemes": {
+          "default": "none",
+          "div(phi,U)": [
+            "Gauss",
+            "linear"
+          ]
+        },
+        "gradSchemes": {
+          "default": [
+            "Gauss",
+            "linear"
+          ],
+          "grad(p)": [
+            "Gauss",
+            "linear"
+          ]
+        },
+        "interpolationSchemes": {
+          "default": "linear"
+        },
+        "laplacianSchemes": {
+          "default": [
+            "Gauss",
+            "linear",
+            "orthogonal"
+          ]
+        },
+        "snGradSchemes": {
+          "default": "orthogonal"
+        }
+      }
+    },
+    "type": "openFOAM.system.FvSchemes",
+    "version": 2
+  }
+}

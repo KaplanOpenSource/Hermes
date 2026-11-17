@@ -1,0 +1,28 @@
+{
+  "controlDict": {
+    "Execution": {
+      "input_parameters": {
+        "values": {
+          "application": "simpleFoam",
+          "deltaT": 1,
+          "endTime": 500,
+          "functions": [],
+          "purgeWrite": 0,
+          "runTimeModifiable": true,
+          "startFrom": "startTime",
+          "startTime": 0,
+          "stopAt": "endTime",
+          "timeFormat": "general",
+          "timePrecision": 6,
+          "writeCompression": false,
+          "writeControl": "timeStep",
+          "writeFormat": "binary",
+          "writeInterval": 100,
+          "writePrecision": 6
+        }
+      }
+    },
+    "type": "openFOAM.system.ControlDict",
+    "version": 2
+  }
+}

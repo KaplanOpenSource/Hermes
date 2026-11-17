@@ -1,0 +1,59 @@
+{
+  "fvSolution": {
+    "Execution": {
+      "input_parameters": {
+        "SIMPLE": {
+          "consistent": true,
+          "nNonOrthogonalCorrectors": 0
+        },
+        "cache": {
+          "grad(U)": null
+        },
+        "potentialFlow": {
+          "nNonOrthogonalCorrectors": 10
+        },
+        "relaxationFactors": {
+          "equations": {
+            "U": 0.9,
+            "k": 0.5,
+            "omega": 0.5
+          }
+        },
+        "solvers": {
+          "Phi": {
+            "$p": ""
+          },
+          "U": {
+            "nSweeps": 1,
+            "relTol": 0.1,
+            "smoother": "GaussSeidel",
+            "solver": "smoothSolver",
+            "tolerance": 1e-08
+          },
+          "k": {
+            "nSweeps": 1,
+            "relTol": 0.1,
+            "smoother": "GaussSeidel",
+            "solver": "smoothSolver",
+            "tolerance": 1e-08
+          },
+          "omega": {
+            "nSweeps": 1,
+            "relTol": 0.1,
+            "smoother": "GaussSeidel",
+            "solver": "smoothSolver",
+            "tolerance": 1e-08
+          },
+          "p": {
+            "relTol": 0.01,
+            "smoother": "GaussSeidel",
+            "solver": "GAMG",
+            "tolerance": 1e-07
+          }
+        }
+      }
+    },
+    "type": "openFOAM.system.FvSolution",
+    "version": 2
+  }
+}

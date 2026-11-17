@@ -1,0 +1,32 @@
+{
+  "epsilon": {
+    "Execution": {
+      "input_parameters": {
+        "boundaryField": {
+          "frontAndBack": {
+            "type": "empty"
+          },
+          "inlet": {
+            "type": "fixedValue",
+            "value": "uniform 14.855"
+          },
+          "lowerWall": {
+            "type": "epsilonWallFunction",
+            "value": "uniform 14.855"
+          },
+          "outlet": {
+            "type": "zeroGradient"
+          },
+          "upperWall": {
+            "type": "epsilonWallFunction",
+            "value": "uniform 14.855"
+          }
+        },
+        "dimensions": "[ 0 2 -3 0 0 0 0 ]",
+        "internalField": "uniform 14.855"
+      }
+    },
+    "type": "openFOAM.0.Epsilon",
+    "version": 2
+  }
+}

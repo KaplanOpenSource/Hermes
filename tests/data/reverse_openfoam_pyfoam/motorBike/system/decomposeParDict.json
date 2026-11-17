@@ -1,0 +1,25 @@
+{
+  "decomposeParDict": {
+    "Execution": {
+      "input_parameters": {
+        "decomposer": "hierarchical",
+        "distributor": "ptscotch",
+        "hierarchicalCoeffs": {
+          "n": [
+            3,
+            2,
+            1
+          ],
+          "order": "xyz"
+        },
+        "numberOfSubdomains": 6,
+        "zoltanCoeffs": {
+          "lb_approach": "partition",
+          "lb_method": "hypergraph"
+        }
+      }
+    },
+    "type": "openFOAM.system.DecomposePar",
+    "version": 2
+  }
+}
