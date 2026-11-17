@@ -1,7 +1,6 @@
 from __future__ import annotations
-from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
-from PyFoam.RunDictionary.ParsedParameterFile import Field
-from PyFoam.Basics.DataStructures import Vector, BoolProxy, Dimension
+import numpy
+from foamlib import DimensionSet, Dimensioned, FoamFieldFile, FoamFile
 from ..Resources.reTemplateCenter import templateCenter
 from ..utils.logging import get_classMethod_logger
 from pathlib import Path
@@ -72,10 +71,59 @@ def _normalize_parsed_dict(data, split_strings=False):
         return data
 
 
-# Helper to convert PyFoam dict-like objects to native Python types
+def _is_field_entry(path):
+    """The entries foamlib reads as fields: internalField and boundaryField/<patch>/value, gradient, *Value, *Gradient."""
+    return path == ("internalField",) or (
+        len(path) == 3 and path[0] == "boundaryField"
+        and (path[2] in ("value", "gradient") or path[2].endswith(("Value", "Gradient"))))
+
+
+def _foam_text(key, value):
+    """The OpenFOAM text foamlib writes for ``key value;`` -- the value part only."""
+    text = FoamFieldFile.dumps({key: value}).decode()
+    text = text[text.index("}") + 1:].strip()  # drop the FoamFile header dumps adds
+    return text[len(key):].strip().rstrip(";").strip()
+
+
+def _from_foamlib(value, path=()):
+    """
+    foamlib's parsed values as the plain JSON data the workflow templates expect:
+    field values and dimensions stay OpenFOAM text ("uniform (1 0 0)", "[0 1 -1 0 0 0 0]"),
+    a dimensioned value is [dimensions, value], a multi-word entry is a list
+    (["Gauss", "linear"]), a macro without a value ("$p;") is "", and a list
+    of ``name { ... }`` items is flattened to [name, {...}, name, {...}].
+    """
+    if value is None and path and str(path[-1]).startswith("$"):
+        return ""
+    if _is_field_entry(path):
+        return _foam_text("internalField", value)
+    if isinstance(value, DimensionSet):
+        return _foam_text("dimensions", value)
+    if isinstance(value, Dimensioned):
+        named = [value.name] if value.name else []
+        return named + [_foam_text("dimensions", value.dimensions), _from_foamlib(value.value)]
+    if isinstance(value, Mapping):
+        return {k: _from_foamlib(v, path + (k,)) for k, v in value.items()}
+    if isinstance(value, numpy.ndarray):
+        return value.tolist()
+    if isinstance(value, numpy.generic):
+        return value.item()
+    if isinstance(value, tuple):
+        return [_from_foamlib(v) for v in value]
+    if isinstance(value, list):
+        flat = []
+        for item in value:
+            if isinstance(item, tuple) and len(item) == 2 and isinstance(item[0], str) and isinstance(item[1], Mapping):
+                flat.extend([item[0], _from_foamlib(item[1])])
+            else:
+                flat.append(_from_foamlib(item))
+        return flat
+    return value
+
+
 def to_native(obj):
     """
-    Recursively convert PyFoam dict-like objects to native Python types.
+    Recursively convert dict-like objects to native Python types.
     """
     if isinstance(obj, dict):
         try:
@@ -105,25 +153,8 @@ def normalize_in_place(d: Dict[str, Any]) -> Dict[str, Any]:
 
 def unwrap_special_type(val):
     """
-    Unwrap PyFoam's special types and vector/field strings to native Python.
+    Unwrap vector strings to native Python.
     """
-    # PyFoam boolean
-    if isinstance(val, BoolProxy):
-        return bool(val)
-
-    # PyFoam vector
-    if isinstance(val, Vector):
-        return list(val.vals)
-
-    # PyFoam Field (e.g. internalField uniform 0.01;)
-    if isinstance(val, Field):
-        try:
-            # Fields stringify nicely in OpenFOAM syntax
-            return str(val).strip()
-        except Exception:
-            # fallback: treat as list if something weird happens
-            return list(val)
-
     # Stringified vector: e.g. "(5 0 0)"
     if isinstance(val, str):
         match = re.match(r'^\(\s*([^\)]+)\s*\)$', val)
@@ -138,7 +169,7 @@ def unwrap_special_type(val):
 
 def unwrap_booleans_and_vectors(obj):
     """
-    Recursively unwrap special PyFoam types to native Python.
+    Recursively unwrap wrapped values and vector strings to native Python.
     """
     obj = unwrap_special_type(obj)
 
@@ -166,15 +197,11 @@ def unwrap_booleans_and_vectors(obj):
 # ------- JSON Handling -------
 class FoamJSONEncoder(json.JSONEncoder):
     """
-    Custom JSON encoder to handle PyFoam types like BoolProxy and Vector.
+    Custom JSON encoder for the foamlib/numpy values that reach a node.
     """
     def default(self, o):
-        if isinstance(o, BoolProxy):
-            return bool(o)
-        elif isinstance(o, Vector):
-            return list(o.vals)
-        elif isinstance(o, Dimension):
-            return str(o)
+        if isinstance(o, (DimensionSet, Dimensioned, numpy.ndarray, numpy.generic)):
+            return _from_foamlib(o)
         return super().default(o)
 
 
@@ -240,7 +267,8 @@ class DictionaryReverser:
         self.log = get_classMethod_logger(self, "__init__")
         self.dictionary_path = dictionary_path
 
-        self.ppf: Optional[ParsedParameterFile] = None
+        self.content: Optional[Dict[str, Any]] = None
+        self.header: Dict[str, Any] = {}
         self.dict_data: Optional[Dict[str, Any]] = None
         self.dict_name: Optional[str] = None
         self.domain: Optional[str] = None
@@ -270,7 +298,7 @@ class DictionaryReverser:
 
     def parse(self) -> None:
         """
-        Read the OpenFOAM dictionary with PyFoam, capture content, and infer
+        Read the OpenFOAM dictionary with foamlib, capture content, and infer
         node identifiers (domain/subdomain/node_type) directly from the input
         (header + path).
         """
@@ -303,26 +331,25 @@ class DictionaryReverser:
         if p.name == "blockMeshDict":
             edge_override = _extract_edges_manually(p)
 
-        # Parse OpenFOAM file using PyFoam
-        self.ppf = ParsedParameterFile(str(p))
-        print(f"ParsedParameterFile content: {self.ppf.content}")
+        # Parse OpenFOAM file using foamlib
+        self.content = FoamFile(str(p)).as_dict(include_header=True)
+        self.header = self.content.pop("FoamFile", {})
+        self.log.debug(f"Parsed content: {self.content}")
 
         # Use manual edges if needed
         if edge_override is not None:
-            print(" Patched malformed edge parsing via manual override")
-            self.ppf.content["edges"] = edge_override
+            self.log.debug("Patched malformed edge parsing via manual override")
+            self.content["edges"] = edge_override
 
         # Detect dictionary name
-        header_obj = str(self.ppf.header.get("object", "")).strip()
+        header_obj = str(self.header.get("object", "")).strip()
         stem = p.stem.strip()
         self.dict_name = header_obj or stem
         if not self.dict_name:
             raise ValueError(f"Cannot detect dictionary object name for {self.dictionary_path}")
 
-        # Parse and copy
-        raw_data = copy.deepcopy(self.ppf.content)
-        raw_data.pop("FoamFile", None)
-        print(f"raw_data: {raw_data}")
+        # Plain JSON data, in the shapes the workflow templates expect
+        raw_data = _from_foamlib(self.content)
 
         # Convert booleans/vectors to native Python
         unwrapped = unwrap_booleans_and_vectors(raw_data)
@@ -348,7 +375,7 @@ class DictionaryReverser:
             self.dict_data["boundary"] = normalized
 
         # Detect subdomain
-        header_loc = str(self.ppf.header.get("location", "")).strip()
+        header_loc = str(self.header.get("location", "")).strip()
         subdomain = header_loc.strip("/").split("/")[-1] if header_loc else p.parent.name
         self.subdomain = subdomain.strip('"').strip("'") or "system"
 
@@ -373,7 +400,7 @@ class DictionaryReverser:
 
 
     def build_node(self, list_strategy: str = "replace") -> Dict[str, Any]:
-        if self.ppf is None:
+        if self.content is None:
             self.parse()
 
         is_control = (self.dict_name.lower() == "controldict") or \
