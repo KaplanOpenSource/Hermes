@@ -1,0 +1,17 @@
+{
+  "momentumTransport": {
+    "Execution": {
+      "input_parameters": {
+        "RAS": {
+          "model": "kEpsilon",
+          "printCoeffs": true,
+          "turbulence": true,
+          "viscosityModel": "Newtonian"
+        },
+        "simulationType": "RAS"
+      }
+    },
+    "type": "openFOAM.constant.momentumTransport",
+    "version": 2
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "fvSolution": {
+    "Execution": {
+      "input_parameters": {
+        "PISO": {
+          "nCorrectors": 2,
+          "nNonOrthogonalCorrectors": 0,
+          "pRefCell": 0,
+          "pRefValue": 0
+        },
+        "solvers": {
+          "U": {
+            "relTol": 0,
+            "smoother": "symGaussSeidel",
+            "solver": "smoothSolver",
+            "tolerance": 1e-05
+          },
+          "p": {
+            "preconditioner": "DIC",
+            "relTol": 0.05,
+            "solver": "PCG",
+            "tolerance": 1e-06
+          },
+          "pFinal": {
+            "$p": "",
+            "relTol": 0
+          }
+        }
+      }
+    },
+    "type": "openFOAM.system.FvSolution",
+    "version": 2
+  }
+}

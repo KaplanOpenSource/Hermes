@@ -1,0 +1,30 @@
+{
+  "p": {
+    "Execution": {
+      "input_parameters": {
+        "boundaryField": {
+          "frontAndBack": {
+            "type": "empty"
+          },
+          "inlet": {
+            "type": "zeroGradient"
+          },
+          "lowerWall": {
+            "type": "zeroGradient"
+          },
+          "outlet": {
+            "type": "fixedValue",
+            "value": "uniform 0"
+          },
+          "upperWall": {
+            "type": "zeroGradient"
+          }
+        },
+        "dimensions": "[ 0 2 -2 0 0 0 0 ]",
+        "internalField": "uniform 0"
+      }
+    },
+    "type": "openFOAM.0.P",
+    "version": 2
+  }
+}

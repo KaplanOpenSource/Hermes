@@ -1,0 +1,14 @@
+{
+  "physicalProperties": {
+    "Execution": {
+      "input_parameters": {
+        "nu": [
+          "[ 0 2 -1 0 0 0 0 ]",
+          0.01
+        ]
+      }
+    },
+    "type": "openFOAM.constant.physicalProperties",
+    "version": 2
+  }
+}

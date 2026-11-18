@@ -1,0 +1,32 @@
+{
+  "k": {
+    "Execution": {
+      "input_parameters": {
+        "boundaryField": {
+          "frontAndBack": {
+            "type": "empty"
+          },
+          "inlet": {
+            "type": "fixedValue",
+            "value": "uniform 0.375"
+          },
+          "lowerWall": {
+            "type": "kqRWallFunction",
+            "value": "uniform 0.375"
+          },
+          "outlet": {
+            "type": "zeroGradient"
+          },
+          "upperWall": {
+            "type": "kqRWallFunction",
+            "value": "uniform 0.375"
+          }
+        },
+        "dimensions": "[ 0 2 -2 0 0 0 0 ]",
+        "internalField": "uniform 0.375"
+      }
+    },
+    "type": "openFOAM.0.K",
+    "version": 2
+  }
+}

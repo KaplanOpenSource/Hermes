@@ -1,0 +1,12 @@
+{
+  "physicalProperties": {
+    "Execution": {
+      "input_parameters": {
+        "nu": 1e-05,
+        "viscosityModel": "constant"
+      }
+    },
+    "type": "openFOAM.constant.physicalProperties",
+    "version": 2
+  }
+}
